@@ -1,7 +1,7 @@
 ---
 authors:
 - admin
-bio: My research interests include Bayesian Deep Learning, Bayesian Nonparametrics and Statistical Machine Learning.
+bio: Passionate musician, statistics enthusiast
 education:
   courses:
   - course: MSc in Economic and Social Sciences
