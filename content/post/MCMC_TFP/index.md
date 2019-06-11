@@ -2,17 +2,17 @@
 authors:
 - admin
 categories: []
-date: "2019-06-11T00:00:00Z"
+date: "2019-02-05T00:00:00Z"
 draft: false
 featured: false
 image:
   caption: ""
   focal_point: ""
 projects: []
-subtitle: []
-summary: This blog post is an attempt at trying to explain the intuition behind MCMC sampling: specifically, a particular instance of the __Metropolis-Hasting algorithm__. Critically, we'll be using `TensonFlow Probability` code examples to explain the various concepts. 
+subtitle: Learn how to blog in Academic using Jupyter notebooks
+summary: Learn how to blog in Academic using Jupyter notebooks
 tags: []
-title: Bayesian Inference with MCMC
+title: Display Jupyter Notebooks with Academic
 ---
 
 #Bayesian Inference with MCMC
