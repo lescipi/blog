@@ -1,0 +1,485 @@
+--- 
+title: "Statistical concepts with R"
+author: "Pietro Lesci"
+date: 2019-05-30
+links:
+  - icon_pack: fab
+    icon: twitter
+    name: Follow
+    url: 'https://twitter.com/lescipi'
+  - icon_pack: fab
+    icon: github
+    name: Fork
+    url: 'https://github.com/lescipi/Statistical-Concepts-with-R'
+reading_time: true
+summary: "In this chapter we review the basics of the R programming language and we explore the tidyverse: a universe of interrelated packages that modernize the basic R and simplify operations in a coherent way. It contributed to the estabilishment of R as one of the preferred tools for data science outside the academia."
+---
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>In this chapter we review the basics of the R programming language and we explore the tidyverse: a universe of interrelated packages that modernize the basic R and simplify operations in a coherent way. It contributed to the estabilishment of R as one of the preferred tools for data science outside the academia.</p>
+<div id="r" class="section level2">
+<h2>R</h2>
+<p>To download R, go to CRAN, the <strong>C</strong>omprehensive <strong>R</strong> <strong>A</strong>rchive <strong>N</strong>etwork. CRAN is composed of a set of mirror servers distributed around the world and is used to distribute R and R packages. There is no need to pick a mirror that is close to the location from where you are downloading: instead use the cloud mirror, <a href="https://cloud.r-project.org" class="uri">https://cloud.r-project.org</a>, which automatically figures it out optimally.</p>
+<p>Once a year a new major version of R is released, besides 2-3 minor releases. It is suggested to update it regularly. Upgrading can be a bit of a hassle, especially for major versions, which require the users to reinstall all packages, but putting it off only makes it worse and prevents the user to work with the state-of-the-art tools.</p>
+</div>
+<div id="rstudio" class="section level2">
+<h2>RStudio</h2>
+<p>RStudio is an integrated development environment, or IDE, for R programming. Download and install it from <a href="http://www.rstudio.com/download" class="uri">http://www.rstudio.com/download</a>. RStudio is updated usually twice a year. When a new version is available, RStudio notifies the user and asks for the confirmation to perform the update. It is a good practice to upgrade regularly in order to take advantage of the latest and greatest features. For this book, I am making use of RStudio. Writing any kind of paper that requires to write latex code and R code is easely done within RStudio. Furthermore, thanks to great packages, it is nowadays possible to create and deploy apps, websites, html files completely written in RStudio. Therefore, besides statistical analysis, RStudio is a great companion during your years at university and beyond. The three great packages that enhance RStudio capabilities are <code>rmarkdown</code>, <code>bookdown</code>, and <code>rshiny</code>.</p>
+<p>When start RStudio, four key regions will appear in the interface:</p>
+<div class="figure">
+<img src="mimmo.png" />
+
+</div>
+<p><img src="mimmo.png" width="100%" /></p>
+<p>R code can be typed in the console pane, and pressing enter will run it. This way of programming is often called interactive programming. For more complicated pieces of code, and to share code with others, it is convenient to write code in the editor. It is still possible to run a single line of code pressing ctrl and enter, but more conveniently it is possible to run (or source) an entire script.</p>
+</div>
+<div id="the-r-language-basics" class="section level2">
+<h2>The R language: basics</h2>
+<p>In this section we will review the building blocks R which are, in general the basic activities that a language should have to be considered a :</p>
+<ul>
+<li>data structures</li>
+<li>control flow</li>
+<li>iterations</li>
+<li>functions</li>
+</ul>
+<div id="data-structures" class="section level3">
+<h3>Data structures</h3>
+<p>R’s base data structures can be organised by their dimensionality (1d, 2d, or nd) and whether they are homogeneous (all contents must be of the same type) or heterogeneous (the contents can be of different types). This gives rise to the five data types most often used in data analysis:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th>Homogeneous</th>
+<th>Heterogeneous</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1d</td>
+<td>Atomic</td>
+<td>Vector List</td>
+</tr>
+<tr class="even">
+<td>2d</td>
+<td>Matrix</td>
+<td>Dataframe</td>
+</tr>
+<tr class="odd">
+<td>nd</td>
+<td>Array</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Note that R has no 0-dimensional, or scalar types. Individual numbers or strings are actually vectors of length one.</p>
+<p>Given an object, the best way to understand in which data structures it is stored is to use <code>str()</code>. <code>str()</code> is short for structure and it gives a compact, human readable description of any R data structure.</p>
+<div id="vectors" class="section level4">
+<h4>Vectors</h4>
+<p>The basic data structure in R is the vector. Vectors come in two flavours: atomic vectors and lists. They have three common properties:</p>
+<ul>
+<li>Type, <code>typeof()</code>, what it is</li>
+<li>Length, <code>length()</code>, how many elements it contains</li>
+<li>Attributes, <code>attributes()</code>, additional arbitrary metadata</li>
+</ul>
+<p>They differ in the types of their elements: all elements of an atomic vector must be the same type, whereas the elements of a list can have different types.</p>
+<p><strong>Atomic vectors</strong> are usually created with <code>c()</code>, short for :</p>
+<pre class="r"><code>vector &lt;- c(1, 2, 3)</code></pre>
+<p>They are always flat, even if you nest <code>c()</code>’s</p>
+<pre class="r"><code>c(c(1), c(2, 3))</code></pre>
+<pre><code>## [1] 1 2 3</code></pre>
+<p>Missing values are specified with <code>NA</code>, which is a logical vector of length 1. All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.</p>
+<p>For example, combining a character and an integer yields a character:</p>
+<pre class="r"><code>c(&#39;a&#39;, 1)</code></pre>
+<pre><code>## [1] &quot;a&quot; &quot;1&quot;</code></pre>
+<p>When a logical vector is coerced to an integer or double, <code>TRUE</code> becomes 1 and <code>FALSE</code> becomes 0. This is very useful in conjunction with <code>sum()</code> and <code>mean()</code></p>
+<pre class="r"><code>sum(c(TRUE, FALSE, 1))</code></pre>
+<pre><code>## [1] 2</code></pre>
+<p><strong>Lists</strong> are different from atomic vectors because their elements can be of any type, including lists. You construct lists by using <code>list()</code> instead of <code>c()</code>:</p>
+<pre class="r"><code>x &lt;- list(1:3, &#39;a&#39;, &quot;b&quot;, c(TRUE, FALSE, TRUE), c(2.3, 5.9))
+str(x)</code></pre>
+<pre><code>## List of 5
+##  $ : int [1:3] 1 2 3
+##  $ : chr &quot;a&quot;
+##  $ : chr &quot;b&quot;
+##  $ : logi [1:3] TRUE FALSE TRUE
+##  $ : num [1:2] 2.3 5.9</code></pre>
+<p>Note how <code>''</code> and <code>&quot;&quot;</code> can be used interchangeably to define strings, or characters: in R, unlike Python, there is no distinction between the two. As said above, <code>str()</code> returns the structure of an object, more info with <code>?str</code>. Lists are sometimes called recursive vectors, because a list can contain other lists. This makes them fundamentally different from atomic vectors.</p>
+<pre class="r"><code>x &lt;- list(list(list(list())))
+str(x)</code></pre>
+<pre><code>## List of 1
+##  $ :List of 1
+##   ..$ :List of 1
+##   .. ..$ : list()</code></pre>
+<p><code>c()</code> will combine several lists into one. If given a combination of atomic vectors and lists, <code>c()</code> will coerce the vectors to lists before combining them. Compare the results of <code>list()</code> and <code>c()</code>:</p>
+<pre class="r"><code>x &lt;- list(list(1, 2), c(3, 4))
+y &lt;- c(list(1, 2), c(3, 4))
+str(x)</code></pre>
+<pre><code>## List of 2
+##  $ :List of 2
+##   ..$ : num 1
+##   ..$ : num 2
+##  $ : num [1:2] 3 4</code></pre>
+<pre class="r"><code>str(y)</code></pre>
+<pre><code>## List of 4
+##  $ : num 1
+##  $ : num 2
+##  $ : num 3
+##  $ : num 4</code></pre>
+</div>
+<div id="arrays-and-matrices" class="section level4">
+<h4>Arrays and Matrices</h4>
+<p>Matrices are a special type of array: they are 2-dimensional arrays. They can be defined by creating a list of objects and providing the dimensions</p>
+<pre class="r"><code>matrix(list(1, 2, 3, &#39;a&#39;, &#39;b&#39;, &#39;c&#39;), nrow = 3, ncol = 2)</code></pre>
+<pre><code>##      [,1] [,2]
+## [1,] 1    &quot;a&quot; 
+## [2,] 2    &quot;b&quot; 
+## [3,] 3    &quot;c&quot;</code></pre>
+<pre class="r"><code>matrix(c(1, 2, 3, &#39;a&#39;, &#39;b&#39;, &#39;c&#39;), nrow = 3, ncol = 2)</code></pre>
+<pre><code>##      [,1] [,2]
+## [1,] &quot;1&quot;  &quot;a&quot; 
+## [2,] &quot;2&quot;  &quot;b&quot; 
+## [3,] &quot;3&quot;  &quot;c&quot;</code></pre>
+<p>Note that <code>matrix()</code> and <code>array()</code> can host any kind of data types: they just store the data in a multidimensional format. Note how the number are coerced to strings when fed through <code>c()</code> contrarely at what happens when using <code>list()</code>.</p>
+</div>
+<div id="dataframes" class="section level4">
+<h4>Dataframes</h4>
+<p>A dataframe is the most common way of storing data in R, and if used systematically makes data analysis easier. Under the hood, a dataframe is a list of equal-length vectors. This makes it a 2-dimensional structure, so it shares properties of both the matrix and the list. A dataframe has <code>names()</code>, <code>colnames()</code>, and <code>rownames()</code>, although <code>names()</code> and <code>colnames()</code> are the same thing. The <code>length()</code> of a dataframe is the length of the underlying list and so it is the same as <code>ncol()</code>; <code>nrow()</code> gives the number of rows. You create a dataframe using <code>data.frame()</code>, which takes named vectors (atomic vectors or lists) as input:</p>
+<pre class="r"><code>df &lt;- data.frame(x = 1:3, y = c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;))
+str(df)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    3 obs. of  2 variables:
+##  $ x: int  1 2 3
+##  $ y: Factor w/ 3 levels &quot;a&quot;,&quot;b&quot;,&quot;c&quot;: 1 2 3</code></pre>
+<p>Beware <code>data.frame()</code>’s default behaviour which turns strings into factors. Use <code>stringsAsFactors = FALSE</code> to suppress this behaviour.</p>
+<p>You can combine dataframes using <code>cbind()</code> and <code>rbind()</code>:</p>
+<pre class="r"><code>df_1 &lt;- data.frame(x = 1:3, y = c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;)) #row:3, col:2
+df_2 &lt;- data.frame(z = 3:1)                       #row:3, col:1
+df_3 &lt;- data.frame(x = 10, y = &quot;z&quot;)               #row:1, col:2
+cbind(df_1, df_2)                                 #row:3, col:3</code></pre>
+<pre><code>##   x y z
+## 1 1 a 3
+## 2 2 b 2
+## 3 3 c 1</code></pre>
+<pre class="r"><code>rbind(df_1, df_3)                                 #row:4, col:2</code></pre>
+<pre><code>##    x y
+## 1  1 a
+## 2  2 b
+## 3  3 c
+## 4 10 z</code></pre>
+<p>When combining column-wise, the number of rows must match, but row names are ignored. When combining row-wise, both the number and names of columns must match.</p>
+</div>
+</div>
+<div id="functions" class="section level3">
+<h3>Functions</h3>
+<p>Functions allow the user to automate common tasks in a more powerful and general way than copy-and-pasting the same code. There are three key steps to creating a new function:</p>
+<ol style="list-style-type: decimal">
+<li><p>Pick a <strong>name</strong> for the function</p></li>
+<li><p>List the inputs, or <strong>arguments</strong>, to the function inside <code>function (...)</code></p></li>
+<li><p>Place the code into the <strong>body</strong> of the function, a <code>{...}</code> block that immediately follows <code>function(...)</code></p></li>
+</ol>
+<pre class="r"><code>my_func &lt;- function(argument) {
+    value &lt;- do_something(argument)
+    return(value)
+}</code></pre>
+<p>Note that the last <code>return()</code> can be discarded and we can just write <code>value</code>. MOre about this below.</p>
+</div>
+<div id="control-structures" class="section level3">
+<h3>Control structures</h3>
+<p>Control structures allow us to specify the execution of the code based on some conditions. They are extremely useful when we want to run a piece of code multiple times, or when we want to run a piece a code if a certain condition is met.</p>
+<p>An <code>if</code> statement allows us to conditionally execute code. It looks like this:</p>
+<pre class="r"><code>if (condition) {
+  # code executed when condition is TRUE
+} else {
+  # code executed when condition is FALSE
+}</code></pre>
+<p>Below a simple function that uses an <code>if</code> statement is presented. The goal of this function is to return a logical value describing whether or not a string is equal to the name .</p>
+<pre class="r"><code>check_name &lt;- function(string) {
+    if (string == &#39;mimmo&#39;) {
+        print(&#39;YES&#39;)
+    } else {
+        print(&#39;NO&#39;)
+    }
+}
+check_name(&#39;pietro&#39;)</code></pre>
+<pre><code>## [1] &quot;NO&quot;</code></pre>
+<p>This function takes advantage of the standard return rule: a function returns the last value that it computed, thus there is no need to use the <code>return()</code> function.</p>
+<p>The condition must evaluate to either a single <code>TRUE</code> or <code>FALSE</code>. If it is a logical vector, we will get a warning message, usually saying that only the first condition has been used; if it is an <code>NA</code>, we will get an error. Watch out for these messages in your own code:</p>
+<pre class="r"><code>if (c(TRUE, FALSE)) {}</code></pre>
+<pre><code>## Warning in if (c(TRUE, FALSE)) {: the condition has length &gt; 1 and only the
+## first element will be used</code></pre>
+<pre><code>## NULL</code></pre>
+<pre class="r"><code>if (NA) {}</code></pre>
+<pre><code>## Error in if (NA) {: missing value where TRUE/FALSE needed</code></pre>
+<p>You can use <code>||</code> (or) and <code>&amp;&amp;</code> (and) to combine multiple logical expressions. These operators are <em>short-circuiting</em>: as soon as <code>||</code> sees the first <code>TRUE</code> it returns <code>TRUE</code> without computing anything else. As soon as <code>&amp;&amp;</code> sees the first <code>FALSE</code> it returns <code>FALSE</code>. This greatly improves performances without causing damages. <code>|</code> or <code>&amp;</code> should be never used in an <code>if</code> statement: these are vectorised operations that apply to multiple values.</p>
+<p>You can chain multiple if statements together:</p>
+<pre class="r"><code>if (this) {
+    # do this
+} else if (that) { 
+    # do that
+} else {
+    # do something else
+}</code></pre>
+<p>When we have a very long series of chained <code>if</code> statements, we can consider to use the <code>switch()</code> function. It allows us to evaluate selected code based on position or name.</p>
+<pre class="r"><code>function(x, y, op) {
+    switch(op,
+           plus = x + y,
+           minus = x - y,
+           times = x * y,
+           divide = x / y,
+           stop(&quot;Unknown op!&quot;)
+    )
+}</code></pre>
+<p>Another useful function that can often eliminate long chains of <code>if</code> statements is <code>cut()</code>. It is used to discretise continuous variables into categories or ranges of values.</p>
+</div>
+<div id="iterations" class="section level3">
+<h3>Iterations</h3>
+<p>Every for loop has three components:</p>
+<ol style="list-style-type: decimal">
+<li><p>The <strong>output</strong>: Before starting the loop, we must always allocate sufficient space for the output. We will see in all our examples that beore a loop is performed, a container is initilized. This is very important for efficiency: if we grow the for loop at each iteration using <code>c()</code> (for example), our for loop will be very slow; keep in mind that R is already slow in performing for loops compared to other programming languages, that is why, when possible, we should use vectorized function.</p></li>
+<li><p>The <strong>sequence</strong>: This determines what to loop over. Usually in R we loop over indices of vector, such as <code>i in nrow(df)</code> to loop over dataframe’s columns; the sequence is placed inside <code>(...)</code> following the <code>for</code> statement</p></li>
+<li><p>The <strong>body</strong>: This is the part of the code that does the work. It’s run repeatedly, each time with a different value of the <strong>sequence</strong></p></li>
+</ol>
+<p>There are some variations that it is important to be aware of. There are three basic ways to loop over a vector. So far we have addressed the most general: looping over the numeric indices with <code>for (i in 1:length(x))</code> or equivalently <code>for (i in seq_along(x)</code>, and extracting the value of <code>x</code> with <code>x[[i]]</code> at each iteration. There are two other forms:</p>
+<ol style="list-style-type: decimal">
+<li><p>Loop over the elements: <code>for (element in x)</code></p></li>
+<li><p>Loop over the names: <code>for (name in names(x))</code>. This gives us name, which we can use to access the value with <code>x[[name]]</code></p></li>
+</ol>
+<pre class="r"><code>x &lt;- c(&#39;a&#39; = 1, &#39;b&#39; = 2, &#39;c&#39; = 3)
+
+# indeces
+for (i in seq_along(x)) {
+    print(i)
+}
+
+# elements
+for (i in x) {
+    print(i)
+}
+
+# names
+for (i in names(x)) {
+    print(x[[i]])
+}</code></pre>
+<p>Imagine we want to loop until we get a specific event. We cannot do that sort of iteration with the for loop since we do not know, ex-ante, how many iterations we will need. Instead, we can use a while loop. A while loop is simpler than for loop because it only has two components, a condition and a body:</p>
+<pre class="r"><code>while (condition) {
+    # body
+}</code></pre>
+<p>A while loop is also more general than a for loop, because we can rewrite any for loop as a while loop, but you cannot rewrite every while loop as a for loop:</p>
+<pre class="r"><code>for (i in seq_along(x)) {
+    # body
+}
+
+# Equivalent to
+i &lt;- 1
+while (i &lt;= length(x)) {
+    # body
+    i &lt;- i + 1 
+}</code></pre>
+<p>Therefore, a while loop is a good choice when we want to find out how many iteration we need to fulfill a specific condition.</p>
+</div>
+</div>
+<div id="the-tidyverse" class="section level2">
+<h2>The tidyverse</h2>
+<p>Base R comes with excellent packages, but we also need to install some other R packages. An R <strong>package</strong> is a collection of functions, data, and documentation that extends the capabilities of base R. Using packages is key to the successful use of R. The majority of the packages that we will use in this book are part of the so-called tidyverse. The packages in the tidyverse share a common philosophy of data and R programming, and are designed to work together naturally.</p>
+<p>You can install the complete tidyverse with a single line of code:</p>
+<pre class="r"><code>install.packages(&#39;tidyverse&#39;)</code></pre>
+<p>On your own computer, type that line of code in the console, and then press enter to run it. R will download the packages from CRAN and install them on to your computer. If you have problems installing, make sure that you are connected to the internet, and that <a href="https://cloud.r-project.org/" class="uri">https://cloud.r-project.org/</a> is not blocked by a firewall or a proxy.</p>
+<p>To use the functions, objects, and help files in a package until we must load it with <code>library()</code> or <code>require()</code>; as far as we are concerned we can consider these two ways of loading R packages equivalent. Once installed, load a package, or a collenction of them in this case, as follows:</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Registered S3 methods overwritten by &#39;ggplot2&#39;:
+##   method         from 
+##   [.quosures     rlang
+##   c.quosures     rlang
+##   print.quosures rlang</code></pre>
+<pre><code>## ── Attaching packages ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse 1.2.1 ──</code></pre>
+<pre><code>## ✔ ggplot2 3.1.1     ✔ purrr   0.3.2
+## ✔ tibble  2.1.2     ✔ dplyr   0.8.1
+## ✔ tidyr   0.8.3     ✔ stringr 1.4.0
+## ✔ readr   1.3.1     ✔ forcats 0.4.0</code></pre>
+<pre><code>## ── Conflicts ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()</code></pre>
+<p>This tells you that tidyverse is loading the ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the <strong>core</strong> of the tidyverse because they are used in almost every analysis.</p>
+<p>Packages in the tidyverse change fairly frequently. To check for updates, and optionally install them, run <code>tidyverse_update()</code>.</p>
+<div id="tibbles" class="section level3">
+<h3>Tibbles</h3>
+<p>Throughout this book we work with  instead of R’s traditional <code>data.frame</code>. Tibbles <em>are</em> dataframes, but they tweak some older behaviours to make life a little easier. R is an old language, and some things that were useful 10 or 20 years ago now get in our way. It is difficult to change base R without breaking existing code, so most innovation occurs in packages. Here we will describe the <strong>tibble</strong> package, which <span class="citation">[@r4ds]</span>. We will use the term tibble and dataframe interchangeably.</p>
+<p>Almost all of the functions that we will use in this book produce tibbles, as tibbles are one of the unifying features of the tidyverse. Most other R packages use regular dataframes, so to coerce a dataframe to a tibble we can use the dplyr function <code>as_tibble()</code>:</p>
+<pre class="r"><code>as_tibble(iris)</code></pre>
+<pre><code>## # A tibble: 150 x 5
+##    Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+##           &lt;dbl&gt;       &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt; &lt;fct&gt;  
+##  1          5.1         3.5          1.4         0.2 setosa 
+##  2          4.9         3            1.4         0.2 setosa 
+##  3          4.7         3.2          1.3         0.2 setosa 
+##  4          4.6         3.1          1.5         0.2 setosa 
+##  5          5           3.6          1.4         0.2 setosa 
+##  6          5.4         3.9          1.7         0.4 setosa 
+##  7          4.6         3.4          1.4         0.3 setosa 
+##  8          5           3.4          1.5         0.2 setosa 
+##  9          4.4         2.9          1.4         0.2 setosa 
+## 10          4.9         3.1          1.5         0.1 setosa 
+## # … with 140 more rows</code></pre>
+<p>We can create a new tibble from individual vectors with <code>tibble()</code>. <code>tibble()</code> will automatically recycle inputs of length 1, and allows us to refer to variables that we just created, as shown below. For any practical purpose, we can consider the use of <code>tibble()</code> equivalent to <code>data.frame()</code>.</p>
+<pre class="r"><code>tibble(
+    x = 1:5, 
+    y = 1, 
+    z = x ^ 2 + y
+)</code></pre>
+<pre><code>## # A tibble: 5 x 3
+##       x     y     z
+##   &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1     1     1     2
+## 2     2     1     5
+## 3     3     1    10
+## 4     4     1    17
+## 5     5     1    26</code></pre>
+<p>Note that <code>tibble()</code> does much less than <code>data.frame()</code>: it never changes the type of the inputs (e.g. it never converts strings to factors!), it never changes the names of variables, and it never creates row names.</p>
+<p>It is possible for a tibble to <em>have</em> column names that are not valid R variable names, known as <strong>non-syntactic</strong> names. For example, they might not start with a letter, or they might contain unusual characters like a space. To refer to these variables, we need to surround them with backticks, <code>`</code>:</p>
+<pre class="r"><code>tb &lt;- tibble(
+    `:)` = &quot;smile&quot;, 
+    ` ` = &quot;space&quot;,
+    `2000` = &quot;number&quot;
+)
+tb</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   `:)`  ` `   `2000`
+##   &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; 
+## 1 smile space number</code></pre>
+<p>We will also need the backticks when working with these variables in other packages, like ggplot2, dplyr, and tidyr.</p>
+<p>Another way to create a tibble is with <code>tribble()</code>, short for <strong>tr</strong>ansposed tibble. <code>tribble()</code> is customised for data entry in code: column headings are defined by formulas (i.e. they start with <code>~</code>), and entries are separated by commas. This makes it possible to lay out small amounts of data in an easy-to-read form.</p>
+<pre class="r"><code>tribble(
+    ~x, ~y, ~z,
+    &quot;a&quot;, 2, 3.6,
+    &quot;b&quot;, 1, 8.5
+)</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   x         y     z
+##   &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 a         2   3.6
+## 2 b         1   8.5</code></pre>
+<p>There are two main differences in the usage of a tibble vs a classic <code>data.frame</code>: printing and subsetting.</p>
+<p><strong>Printing</strong>: Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen. This makes it much easier to work with large data. In addition to its name, each column reports its type, a nice feature borrowed from <code>str()</code>. Tibbles are designed to not accidentally overwhelm the console when printing large dataframes. But sometimes we need more output than the default display. There are a few options that can help. First, we can explicitly <code>print()</code> the dataframe and control the number of rows (<code>n</code>) and the <code>width</code> of the display. <code>width = Inf</code> will display all columns:</p>
+<pre class="r"><code>mtcars %&gt;% print(n = 10, width = Inf)</code></pre>
+<p>You can see a complete list of options by looking at the package help with <code>package?tibble</code>. A final option is to use RStudio’s built-in data viewer to get a scrollable view of the complete dataset. This is also often useful at the end of a long chain of manipulations.</p>
+<pre class="r"><code>mtcars %&gt;% View()</code></pre>
+<p><strong>Subsetting</strong>: To pull out a single variable we can use <code>$</code> and <code>[[</code>. <code>[[</code> can extract by name or position; <code>$</code> only extracts by name but is a little less typing.</p>
+<pre class="r"><code>df &lt;- tibble(
+    x = runif(5),
+    y = rnorm(5)
+)
+
+# Extract by name
+df$x</code></pre>
+<pre><code>## [1] 0.2226020 0.2517551 0.5393786 0.5470887 0.4108655</code></pre>
+<pre class="r"><code>df[[&#39;x&#39;]]</code></pre>
+<pre><code>## [1] 0.2226020 0.2517551 0.5393786 0.5470887 0.4108655</code></pre>
+<pre class="r"><code># Extract by position
+df[[1]]</code></pre>
+<pre><code>## [1] 0.2226020 0.2517551 0.5393786 0.5470887 0.4108655</code></pre>
+<p>To use these in a pipe, we need to use the special placeholder <code>.</code>:</p>
+<pre class="r"><code>df %&gt;% .$x</code></pre>
+<pre><code>## [1] 0.2226020 0.2517551 0.5393786 0.5470887 0.4108655</code></pre>
+<pre class="r"><code>df %&gt;% .[[&quot;x&quot;]]</code></pre>
+<pre><code>## [1] 0.2226020 0.2517551 0.5393786 0.5470887 0.4108655</code></pre>
+<p>More on the pipe below. Compared to a <code>data.frame</code>, tibbles are more strict: they never do partial matching, and they will generate a warning if the column you are trying to access does not exist.</p>
+</div>
+<div id="magrittr-and-the-pipe" class="section level3">
+<h3>Magrittr and the Pipe</h3>
+<p>Pipes are a powerful tool for clearly expressing a sequence of multiple operations. So far, we have been using them without knowing how they work, or what the alternatives are. Now, in this section, we will explore the pipe in more detail.</p>
+<p>The pipe, <code>%&gt;%</code>, comes from the <strong>magrittr</strong> package by Stefan Milton Bache. Packages in the tidyverse load only <code>%&gt;%</code> for us automatically, not the entire package magrittr explicitly. Here, however, we are focussing on piping, and we are not loading any other package, so we will load it explicitly.</p>
+<pre class="r"><code>library(magrittr)</code></pre>
+<p>The point of the pipe is to help in writing code in a way that is easier to read and understand. To see why the pipe is so useful, we are going to explore a number of ways of writing the same code. Let’s use code to tell a story about a common Bocconi student daily routine:</p>
+<blockquote>
+<p>Wake up<br />
+Have a coffee<br />
+Have a shower<br />
+Sit at the desk<br />
+Study Sleep</p>
+</blockquote>
+<p>We start by defining an object to represent the Bocconi student:</p>
+<pre class="r"><code>student &lt;- student()</code></pre>
+<p>And we use a function for each key verb: <code>wake_up()</code>, <code>have_coffee()</code>, <code>shower()</code>, <code>sit()</code>, <code>study()</code>, and <code>sleep()</code>. Using this object and these verbs, there are (at least) four ways we could retell the story in code:</p>
+<ol style="list-style-type: decimal">
+<li>Save each intermediate step as a new object</li>
+<li>Overwrite the original object many times</li>
+<li>Compose functions</li>
+<li>Use the pipe</li>
+</ol>
+<p>We will implement each approach, showing the code and talking about the advantages and disadvantages.</p>
+<p>The simplest approach is to save each step as a new object:</p>
+<pre class="r"><code>student_1 &lt;- wake_up(student)
+student_2 &lt;- have_coffee(student_1)
+student_3 &lt;- shower(student_2)
+student_4 &lt;- sit(student_3)
+student_5 &lt;- study(student_4)
+student_6 &lt;- sleep(student_5)</code></pre>
+<p>The main downside of this form is that it forces us to name each intermediate element. That leads to two problems:</p>
+<ul>
+<li>The code is cluttered with unimportant names</li>
+<li>We have to carefully increment the suffix on each line</li>
+</ul>
+<p>Instead of creating intermediate objects at each step, we can overwrite the original object:</p>
+<pre class="r"><code>student &lt;- wake_up(student)
+student &lt;- have_coffee(student)
+student &lt;- shower(student)
+student &lt;- sit(student)
+student &lt;- study(student)
+student &lt;- sleep(student)</code></pre>
+<p>There are two problems with this approach:</p>
+<ul>
+<li>Difficult debugging: if we make a mistake we will need to re-run the complete pipeline from the beginning</li>
+<li>The repetition of the object being transformed (we have written <code>student</code> 12 times!) obscures what is changing on each line.</li>
+</ul>
+<p>Another approach is to abandon assignment and just string the function calls together:</p>
+<pre class="r"><code>sleep(
+    study(
+        sit(
+            shower(
+                have_coffee(
+                    wake_up(student)
+                )
+            )
+        )
+    )
+)</code></pre>
+<p>Here the disadvantage is that we have to read from inside-out, from right-to-left, and that the arguments end up spread far apart. In short, this code is hard for a human to consume.</p>
+<p>Finally, we can use the pipe:</p>
+<pre class="r"><code>student %&gt;%
+    wake_up() %&gt;% 
+    have_coffee() %&gt;% 
+    shower() %&gt;% 
+    sit() %&gt;% 
+    study() %&gt;% 
+    sleep()</code></pre>
+<p>This form focusses on verbs, not nouns. We can read this series of function compositions like it is a set of imperative actions. The downside, of course, is that we need to be familiar with the pipe. The pipe works by performing a : behind the scenes, magrittr reassembles the code in the pipe to a form that works by overwriting an intermediate object. When we run a pipe like the one above, magrittr does something like this:</p>
+<pre class="r"><code>my_pipe &lt;- function(.) {
+    . &lt;- wake_up(.)
+    . &lt;- have_coffee(.)
+    . &lt;- shower(.)
+    . &lt;- sit(.)
+    . &lt;- study(.)
+    sleep(.)
+}
+my_pipe(student)</code></pre>
+</div>
+<div id="other-packages" class="section level3">
+<h3>Other packages</h3>
+<p>There are many other excellent packages that are not part of the tidyverse because they solve problems in a different domain or are designed with a different set of underlying principles. This does not make them better or worse, just different.</p>
+</div>
+</div>
+<div id="running-r-code" class="section level2">
+<h2>Running R code</h2>
+<p>The previous sections showed a couple of examples of running R code. Code in the book looks like this:</p>
+<pre class="r"><code>1 + 2</code></pre>
+<pre><code>## [1] 3</code></pre>
+<p>There are two main differences. In the usual R console, we type after the <code>&gt;</code>, called the <strong>prompt</strong>; we do not show the prompt in the book. Furthermore, in the book the output is commented out with <code>#&gt;</code>; in the console it appears directly after the code.</p>
+</div>
+<div id="python-julia-and-friends" class="section level2">
+<h2>Python, Julia, and friends</h2>
+<p>In this book, we will not learn anything about Python, Julia, or any other programming language useful for data science. This is not because we think these tools are bad. They are not! And in practice, most data science teams use a mix of languages, often at least R and Python.</p>
+<p>However, we strongly believe that it is best to master one tool at a time. We think R is a great place to start any data science journey because it is an environment designed from the ground up to support data science. R is not just a programming language, but it is also an interactive environment for doing data science. To support interaction, R is a much more flexible language than many of its peers, like Python. This flexibility comes with its downsides, but the big upside is how easy it is to evolve tailored grammars for specific parts of the data science process.</p>
+</div>
+</div>

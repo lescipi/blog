@@ -1,0 +1,460 @@
+--- 
+title: "Statistical concepts with R"
+author: "Pietro Lesci"
+date: 2019-05-30
+links:
+  - icon_pack: fab
+    icon: twitter
+    name: Follow
+    url: 'https://twitter.com/lescipi'
+  - icon_pack: fab
+    icon: github
+    name: Fork
+    url: 'https://github.com/lescipi/Statistical-Concepts-with-R'
+reading_time: true
+summary: "In this chapter we review the basics of the R programming language and we explore the tidyverse: a universe of interrelated packages that modernize the basic R and simplify operations in a coherent way. It contributed to the estabilishment of R as one of the preferred tools for data science outside the academia."
+---
+
+# Introduction
+In this chapter we review the basics of the R programming language and we explore the tidyverse: a universe of interrelated packages that modernize the basic R and simplify operations in a coherent way. It contributed to the estabilishment of R as one of the preferred tools for data science outside the academia.
+
+
+## R 
+To download R, go to CRAN, the **C**omprehensive **R** **A**rchive **N**etwork. CRAN is composed of a set of mirror servers distributed around the world and is used to distribute R and R packages. There is no need to pick a mirror that is close to the location from where you are downloading: instead use the cloud mirror, <https://cloud.r-project.org>, which automatically figures it out optimally.
+
+Once a year a new major version of R is released, besides 2-3 minor releases. It is suggested to update it regularly. Upgrading can be a bit of a hassle, especially for major versions, which require the users to reinstall all packages, but putting it off only makes it worse and prevents the user to work with the state-of-the-art tools.
+
+
+## RStudio
+RStudio is an integrated development environment, or IDE, for R programming. Download and install it from <http://www.rstudio.com/download>. RStudio is updated usually twice a year. When a new version is available, RStudio notifies the user and asks for the confirmation to perform the update. It is a good practice to upgrade regularly in order to take advantage of the latest and greatest features. For this book, I am making use of RStudio. Writing any kind of paper that requires to write latex code and R code is easely done within RStudio. Furthermore, thanks to great packages, it is nowadays possible to create and deploy apps, websites, html files completely written in RStudio. Therefore, besides statistical analysis, RStudio is a great companion during your years at university and beyond. The three great packages that enhance RStudio capabilities are `rmarkdown`, `bookdown`, and `rshiny`.
+
+When start RStudio, four key regions will appear in the interface:
+
+![](mimmo.png)
+
+```{r echo = FALSE, out.width = "100%"}
+knitr::include_graphics("mimmo.png")
+```
+
+R code can be typed in the console pane, and pressing enter will run it. This way of programming is often called interactive programming. For more complicated pieces of code, and to share code with others, it is convenient to write code in the editor. It is still possible to run a single line of code pressing ctrl and enter, but more conveniently it is possible to run (or source) an entire script.
+
+
+## The R language: basics
+In this section we will review the building blocks R which are, in general the basic activities that a language should have to be considered a \say{programming language}\footnote{An example of a language which is not considered a programming language is HTML.}:
+
+* data structures
+* control flow
+* iterations
+* functions
+
+### Data structures
+R's base data structures can be organised by their dimensionality (1d, 2d, or nd) and whether they are homogeneous (all contents must be of the same type) or heterogeneous (the contents can be of different types). This gives rise to the five data types most often used in data analysis:
+
+| | Homogeneous | Heterogeneous |
+|---|-------|-------|
+| 1d |	Atomic | Vector	List |
+| 2d |	Matrix |	Dataframe |
+| nd |	Array |	|
+
+Note that R has no 0-dimensional, or scalar types. Individual numbers or strings are actually vectors of length one.
+
+Given an object, the best way to understand in which data structures it is stored is to use `str()`. `str()` is short for structure and it gives a compact, human readable description of any R data structure.
+
+#### Vectors
+The basic data structure in R is the vector. Vectors come in two flavours: atomic vectors and lists. They have three common properties:
+
+* Type, `typeof()`, what it is
+* Length, `length()`, how many elements it contains
+* Attributes, `attributes()`, additional arbitrary metadata
+
+They differ in the types of their elements: all elements of an atomic vector must be the same type, whereas the elements of a list can have different types. 
+
+__Atomic vectors__ are usually created with `c()`, short for \say{combine}:
+```{r, eval=FALSE}
+vector <- c(1, 2, 3)
+```
+They are always flat, even if you nest `c()`'s
+```{r}
+c(c(1), c(2, 3))
+```
+Missing values are specified with `NA`, which is a logical vector of length 1. All elements of an atomic vector must be the same type, so when you attempt to combine different types they will be coerced to the most flexible type. Types from least to most flexible are: logical, integer, double, and character.
+
+For example, combining a character and an integer yields a character:
+```{r}
+c('a', 1)
+```
+When a logical vector is coerced to an integer or double, `TRUE` becomes 1 and `FALSE` becomes 0. This is very useful in conjunction with `sum()` and `mean()`
+
+```{r}
+sum(c(TRUE, FALSE, 1))
+```
+
+__Lists__ are different from atomic vectors because their elements can be of any type, including lists. You construct lists by using `list()` instead of `c()`:
+```{r}
+x <- list(1:3, 'a', "b", c(TRUE, FALSE, TRUE), c(2.3, 5.9))
+str(x)
+```
+Note how `''` and `""` can be used interchangeably to define strings, or characters: in R, unlike Python, there is no distinction between the two. As said above, `str()` returns the structure of an object, more info with `?str`. Lists are sometimes called recursive vectors, because a list can contain other lists. This makes them fundamentally different from atomic vectors.
+```{r}
+x <- list(list(list(list())))
+str(x)
+```
+`c()` will combine several lists into one. If given a combination of atomic vectors and lists, `c()` will coerce the vectors to lists before combining them. Compare the results of `list()` and `c()`:
+```{r}
+x <- list(list(1, 2), c(3, 4))
+y <- c(list(1, 2), c(3, 4))
+str(x)
+str(y)
+```
+
+#### Arrays and Matrices
+Matrices are a special type of array: they are 2-dimensional arrays. They can be defined by creating a list of objects and providing the dimensions
+```{r}
+matrix(list(1, 2, 3, 'a', 'b', 'c'), nrow = 3, ncol = 2)
+matrix(c(1, 2, 3, 'a', 'b', 'c'), nrow = 3, ncol = 2)
+```
+Note that `matrix()` and `array()` can host any kind of data types: they just store the data in a multidimensional format. Note how the number are coerced to strings when fed through `c()` contrarely at what happens when using `list()`.
+
+#### Dataframes
+A dataframe is the most common way of storing data in R, and if used systematically makes data analysis easier. Under the hood, a dataframe is a list of equal-length vectors. This makes it a 2-dimensional structure, so it shares properties of both the matrix and the list. A dataframe has `names()`, `colnames()`, and `rownames()`, although `names()` and `colnames()` are the same thing. The `length()` of a dataframe is the length of the underlying list and so it is the same as `ncol()`; `nrow()` gives the number of rows. You create a dataframe using `data.frame()`, which takes named vectors (atomic vectors or lists) as input:
+```{r}
+df <- data.frame(x = 1:3, y = c("a", "b", "c"))
+str(df)
+```
+Beware `data.frame()`'s default behaviour which turns strings into factors. Use `stringsAsFactors = FALSE` to suppress this behaviour.
+
+You can combine dataframes using `cbind()` and `rbind()`:
+```{r}
+df_1 <- data.frame(x = 1:3, y = c("a", "b", "c")) #row:3, col:2
+df_2 <- data.frame(z = 3:1)                       #row:3, col:1
+df_3 <- data.frame(x = 10, y = "z")               #row:1, col:2
+cbind(df_1, df_2)                                 #row:3, col:3
+rbind(df_1, df_3)                                 #row:4, col:2
+```
+When combining column-wise, the number of rows must match, but row names are ignored. When combining row-wise, both the number and names of columns must match.
+
+
+### Functions
+Functions allow the user to automate common tasks in a more powerful and general way than copy-and-pasting the same code. There are three key steps to creating a new function:
+
+1.  Pick a __name__ for the function
+
+1.  List the inputs, or __arguments__, to the function inside `function (...)`
+
+1.  Place the code into the __body__ of the function, a 
+    `{...}` block that immediately follows `function(...)`
+    
+```{r, eval=FALSE}
+my_func <- function(argument) {
+    value <- do_something(argument)
+    return(value)
+}
+```
+Note that the last `return()` can be discarded and we can just write `value`. MOre about this below.
+
+
+### Control structures
+Control structures allow us to specify the execution of the code based on some conditions. They are extremely useful when we want to run a piece of code multiple times, or when we want to run a piece a code if a certain condition is met.
+
+An `if` statement allows us to conditionally execute code. It looks like this:
+```{r, eval = FALSE}
+if (condition) {
+  # code executed when condition is TRUE
+} else {
+  # code executed when condition is FALSE
+}
+```
+Below a simple function that uses an `if` statement is presented. The goal of this function is to return a logical value describing whether or not a string is equal to the name \say{mimmo}.
+```{r}
+check_name <- function(string) {
+    if (string == 'mimmo') {
+        print('YES')
+    } else {
+        print('NO')
+    }
+}
+check_name('pietro')
+```
+This function takes advantage of the standard return rule: a function returns the last value that it computed, thus there is no need to use the `return()` function.
+
+The condition must evaluate to either a single `TRUE` or `FALSE`. If it is a logical vector, we will get a warning message, usually saying that only the first condition has been used; if it is an `NA`, we will get an error. Watch out for these messages in your own code:
+```{r, error = TRUE}
+if (c(TRUE, FALSE)) {}
+
+if (NA) {}
+```
+You can use `||` (or) and `&&` (and) to combine multiple logical expressions. These operators are _short-circuiting_: as soon as `||` sees the first `TRUE` it returns `TRUE` without computing anything else. As soon as `&&` sees the first `FALSE` it returns `FALSE`. This greatly improves performances without causing damages. `|` or `&` should be never used in an `if` statement: these are vectorised operations that apply to multiple values. 
+
+You can chain multiple if statements together:
+```{r, eval = FALSE}
+if (this) {
+    # do this
+} else if (that) { 
+    # do that
+} else {
+    # do something else
+}
+```
+When we have a very long series of chained `if` statements, we can consider to use the `switch()` function. It allows us to evaluate selected code based on position or name.
+```{r, eval = FALSE}
+function(x, y, op) {
+    switch(op,
+           plus = x + y,
+           minus = x - y,
+           times = x * y,
+           divide = x / y,
+           stop("Unknown op!")
+    )
+}
+```
+Another useful function that can often eliminate long chains of `if` statements is `cut()`. It is used to discretise continuous variables into categories or ranges of values.
+
+### Iterations
+Every for loop has three components:
+
+1.  The __output__: Before starting the loop, we must always allocate sufficient space 
+    for the output. We will see in all our examples that beore a loop is performed, a
+    container is initilized. This is very important for efficiency: if we grow
+    the for loop at each iteration using `c()` (for example), our for loop 
+    will be very slow; keep in mind that R is already slow in performing for loops compared
+    to other programming languages, that is why, when possible, we should use vectorized
+    function.
+    
+1.  The __sequence__: This determines what to loop over. Usually in R we loop
+    over indices of vector, such as `i in nrow(df)` to loop over dataframe's
+    columns; the sequence is placed inside `(...)` following the `for` statement
+    
+1.  The __body__: This is the part of the code that does the work. It's run repeatedly, each
+    time with a different value of the __sequence__
+    
+There are some variations that it is important to be aware of. There are three basic ways to loop over a vector. So far we have addressed the most general: looping over the numeric indices with `for (i in 1:length(x))` or equivalently `for (i in seq_along(x)`, and extracting the value of `x` with `x[[i]]` at each iteration. There are two other forms:
+
+1.  Loop over the elements: `for (element in x)`
+
+1.  Loop over the names: `for (name in names(x))`. This gives us name, which
+    we can use to access the value with `x[[name]]`
+
+```{r, eval=FALSE}
+x <- c('a' = 1, 'b' = 2, 'c' = 3)
+
+# indeces
+for (i in seq_along(x)) {
+    print(i)
+}
+
+# elements
+for (i in x) {
+    print(i)
+}
+
+# names
+for (i in names(x)) {
+    print(x[[i]])
+}
+```
+Imagine we want to loop until we get a specific event. We cannot do that sort of iteration with the for loop since we do not know, ex-ante, how many iterations we will need. Instead, we can use a while loop. A while loop is simpler than for loop because it only has two components, a condition and a body:
+```{r, eval = FALSE}
+while (condition) {
+    # body
+}
+```
+A while loop is also more general than a for loop, because we can rewrite any for loop as a while loop, but you cannot rewrite every while loop as a for loop:
+```{r, eval = FALSE}
+for (i in seq_along(x)) {
+    # body
+}
+
+# Equivalent to
+i <- 1
+while (i <= length(x)) {
+    # body
+    i <- i + 1 
+}
+```
+Therefore, a while loop is a good choice when we want to find out how many iteration we need to fulfill a specific condition.
+
+
+## The tidyverse
+Base R comes with excellent packages, but we also need to install some other R packages. An R __package__ is a collection of functions, data, and documentation that extends the capabilities of base R. Using packages is key to the successful use of R. The majority of the packages that we will use in this book are part of the so-called tidyverse. The packages in the tidyverse share a common philosophy of data and R programming, and are designed to work together naturally. 
+
+You can install the complete tidyverse with a single line of code:
+```{r, eval = FALSE}
+install.packages('tidyverse')
+```
+On your own computer, type that line of code in the console, and then press enter to run it. R will download the packages from CRAN and install them on to your computer. If you have problems installing, make sure that you are connected to the internet, and that <https://cloud.r-project.org/> is not blocked by a firewall or a proxy. 
+
+To use the functions, objects, and help files in a package until we must load it with `library()` or `require()`; as far as we are concerned we can consider these two ways of loading R packages equivalent. Once installed, load a package, or a collenction of them in this case, as follows:
+```{r}
+library(tidyverse)
+```
+This tells you that tidyverse is loading the ggplot2, tibble, tidyr, readr, purrr, and dplyr packages. These are considered to be the __core__ of the tidyverse because they are used in almost every analysis. 
+
+Packages in the tidyverse change fairly frequently. To check for updates, and optionally install them, run `tidyverse_update()`.
+
+
+### Tibbles
+Throughout this book we work with \say{tibbles} instead of R's traditional `data.frame`. Tibbles _are_ dataframes, but they tweak some older behaviours to make life a little easier. R is an old language, and some things that were useful 10 or 20 years ago now get in our way. It is difficult to change base R without breaking existing code, so most innovation occurs in packages. Here we will describe the __tibble__ package, which \say{[...] provides opinionated dataframes that make working in the tidyverse a little easier}[@r4ds]. We will use the term tibble and dataframe interchangeably.
+
+Almost all of the functions that we will use in this book produce tibbles, as tibbles are one of the unifying features of the tidyverse. Most other R packages use regular dataframes, so to coerce a dataframe to a tibble we can use the dplyr function `as_tibble()`:
+```{r}
+as_tibble(iris)
+```
+We can create a new tibble from individual vectors with `tibble()`. `tibble()` will automatically recycle inputs of length 1, and allows us to refer to variables that we just created, as shown below. For any practical purpose, we can consider the use of `tibble()` equivalent to `data.frame()`.
+```{r}
+tibble(
+    x = 1:5, 
+    y = 1, 
+    z = x ^ 2 + y
+)
+```
+Note that `tibble()` does much less than `data.frame()`: it never changes the type of the inputs (e.g. it never converts strings to factors!), it never changes the names of variables, and it never creates row names.
+
+It is possible for a tibble to _have_ column names that are not valid R variable names, known as __non-syntactic__ names. For example, they might not start with a letter, or they might contain unusual characters like a space. To refer to these variables, we need to surround them with backticks, `` ` ``:
+```{r}
+tb <- tibble(
+    `:)` = "smile", 
+    ` ` = "space",
+    `2000` = "number"
+)
+tb
+```
+We will also need the backticks when working with these variables in other packages, like ggplot2, dplyr, and tidyr.
+
+Another way to create a tibble is with `tribble()`, short for **tr**ansposed tibble.  `tribble()` is customised for data entry in code: column headings are defined by formulas (i.e. they start with `~`), and entries are separated by commas. This makes it possible to lay out small amounts of data in an easy-to-read form.
+```{r}
+tribble(
+    ~x, ~y, ~z,
+    "a", 2, 3.6,
+    "b", 1, 8.5
+)
+```
+There are two main differences in the usage of a tibble vs a classic `data.frame`: printing and subsetting.
+
+__Printing__: Tibbles have a refined print method that shows only the first 10 rows, and all the columns that fit on screen. This makes it much easier to work with large data. In addition to its name, each column reports its type, a nice feature borrowed from `str()`. Tibbles are designed to not accidentally overwhelm the console when printing large dataframes. But sometimes we need more output than the default display. There are a few options that can help. First, we can explicitly `print()` the dataframe and control the number of rows (`n`) and the `width` of the display. `width = Inf` will display all columns:
+```{r, eval = FALSE}
+mtcars %>% print(n = 10, width = Inf)
+```
+You can see a complete list of options by looking at the package help with `package?tibble`. A final option is to use RStudio's built-in data viewer to get a scrollable view of the complete dataset. This is also often useful at the end of a long chain of manipulations.
+```{r, eval = FALSE}
+mtcars %>% View()
+```
+
+__Subsetting__: To pull out a single variable we can use `$` and `[[`. `[[` can extract by name or position; `$` only extracts by name but is a little less typing.
+```{r}
+df <- tibble(
+    x = runif(5),
+    y = rnorm(5)
+)
+
+# Extract by name
+df$x
+df[['x']]
+
+# Extract by position
+df[[1]]
+```
+To use these in a pipe, we need to use the special placeholder `.`:
+```{r}
+df %>% .$x
+df %>% .[["x"]]
+```
+More on the pipe below. Compared to a `data.frame`, tibbles are more strict: they never do partial matching, and they will generate a warning if the column you are trying to access does not exist.
+
+
+### Magrittr and the Pipe
+Pipes are a powerful tool for clearly expressing a sequence of multiple operations. So far, we have been using them without knowing how they work, or what the alternatives are. Now, in this section, we will explore the pipe in more detail.
+
+The pipe, `%>%`, comes from the __magrittr__ package by Stefan Milton Bache. Packages in the tidyverse load only `%>%` for us automatically, not the entire package magrittr explicitly. Here, however, we are focussing on piping, and we are not loading any other package, so we will load it explicitly.
+```{r, message = FALSE}
+library(magrittr)
+```
+The point of the pipe is to help in writing code in a way that is easier to read and understand. To see why the pipe is so useful, we are going to explore a number of ways of writing the same code. Let's use code to tell a story about a common Bocconi student daily routine:
+
+> Wake up  
+> Have a coffee  
+> Have a shower  
+> Sit at the desk  
+> Study
+> Sleep
+
+We start by defining an object to represent the Bocconi student:
+```{r, eval = FALSE}
+student <- student()
+```
+And we use a function for each key verb: `wake_up()`, `have_coffee()`, `shower()`, `sit()`, `study()`, and `sleep()`. Using this object and these verbs, there are (at least) four ways we could retell the story in code:
+
+1. Save each intermediate step as a new object
+1. Overwrite the original object many times
+1. Compose functions
+1. Use the pipe
+
+We will implement each approach, showing the code and talking about the advantages and disadvantages.
+
+The simplest approach is to save each step as a new object:
+```{r, eval = FALSE}
+student_1 <- wake_up(student)
+student_2 <- have_coffee(student_1)
+student_3 <- shower(student_2)
+student_4 <- sit(student_3)
+student_5 <- study(student_4)
+student_6 <- sleep(student_5)
+```
+The main downside of this form is that it forces us to name each intermediate element. That leads to two problems:
+
+* The code is cluttered with unimportant names
+* We have to carefully increment the suffix on each line
+
+Instead of creating intermediate objects at each step, we can overwrite the original object:
+```{r, eval = FALSE}
+student <- wake_up(student)
+student <- have_coffee(student)
+student <- shower(student)
+student <- sit(student)
+student <- study(student)
+student <- sleep(student)
+```
+There are two problems with this approach:
+
+* Difficult debugging: if we make a mistake we will need to re-run the complete pipeline from the beginning
+* The repetition of the object being transformed (we have written `student` 12 
+    times!) obscures what is changing on each line. 
+
+Another approach is to abandon assignment and just string the function calls together:
+
+```{r, eval = FALSE}
+sleep(
+    study(
+        sit(
+            shower(
+                have_coffee(
+                    wake_up(student)
+                )
+            )
+        )
+    )
+)
+```
+Here the disadvantage is that we have to read from inside-out, from right-to-left, and that the arguments end up spread far apart. In short, this code is hard for a human to consume.
+
+Finally, we can use the pipe:
+```{r, eval = FALSE}
+student %>%
+    wake_up() %>% 
+    have_coffee() %>% 
+    shower() %>% 
+    sit() %>% 
+    study() %>% 
+    sleep()
+```
+This form focusses on verbs, not nouns. We can read this series of function compositions like it is a set of imperative actions. The downside, of course, is that we need to be familiar with the pipe. The pipe works by performing a \say{lexical transformation}: behind the scenes, magrittr reassembles the code in the pipe to a form that works by overwriting an intermediate object. When we run a pipe like the one above, magrittr does something like this:
+```{r, eval = FALSE}
+my_pipe <- function(.) {
+    . <- wake_up(.)
+    . <- have_coffee(.)
+    . <- shower(.)
+    . <- sit(.)
+    . <- study(.)
+    sleep(.)
+}
+my_pipe(student)
+```
