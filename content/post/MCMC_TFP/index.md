@@ -2,22 +2,19 @@
 authors:
 - admin
 categories: []
-date: "2019-02-05T00:00:00Z"
+date: "2019-06-11T00:00:00Z"
 draft: false
 featured: false
 image:
   caption: ""
   focal_point: ""
+publishDate: "2019-06-11T00:00:00Z"
 projects: []
-subtitle: Learn how to blog in Academic using Jupyter notebooks
-summary: Learn how to blog in Academic using Jupyter notebooks
+subtitle: []
+summary: "MCMC sampling: The Random-Walk Metropolis-Hasting algorithm explained with TensonFlow Probability"
 tags: []
-title: Display Jupyter Notebooks with Academic
+title: Bayesian Inference with MCMC
 ---
-
-#Bayesian Inference with MCMC
-
-This blog post is an attempt at trying to explain the intuition behind MCMC sampling: specifically, a particular instance of the __Metropolis-Hasting algorithm__. Critically, we'll be using `TensonFlow Probability` code examples to explain the various concepts. 
 
 ## The Problem
 
@@ -67,12 +64,10 @@ The model often depends on unknown parameters $\theta$. They can be unknown beca
 
 From a Bayesian viewpoint, we have to assign a prior distribution for this parameter, i.e. $P(\theta)$. Let's also assume a normal distribution as a prior for $\mu$. Our model can be written as follows (we assumed that the prior is a Gaussian distribution with mean 4 and stardard deviation 2)
 
-$$
-\begin{align}
-  x_i|\mu &\stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1)\\
-  \mu &\sim \mathcal{N}(\mu_0 = 4, \sigma_0 = 2)
-\end{align}
-$$
+$$x_i|\mu \stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1)$$
+
+$$\mu \sim \mathcal{N}(\mu_0 = 4, \sigma_0 = 2)$$
+
 
 
 
@@ -220,12 +215,14 @@ There is a large family of algorithms that perform MCMC. Most of these algorithm
 
 3. Accept/Reject the new position based on the position's adherence to the data and prior distributions.
 
-4. 1.  If you accept: Move to the new position (i.e. $\theta^{(2)}=\theta^*$). Return to Step 1.
-  2. Else: Do not move to new position. Return to Step 1. 
+4. 
+    * If you accept: Move to the new position (i.e. $\theta^{(2)}=\theta^*$) and return to Step 1 
+    * Else: Do not move to new position. Return to Step 1. 
 
 5. After a large number of iterations, return all accepted positions.
 
 Based on how you implement the above steps you get the various MCMC algorithm. Here we will review the __Random-Walk Metropolis-Hasting algorithm__.
+
 
 
 
@@ -259,7 +256,7 @@ mu_proposal = tfd.Normal(mu_current, proposal_width).sample()
 
 Next, you evaluate whether that's a good place to jump to or not. To evaluate if it is good you compute the ratio
 
-$$\rho = \frac{P(\theta^*|x)}{P(\theta_s|x)} = \frac{P(x|\theta^*) P(\theta^*)/P(x)}{P(x|\theta_s) P(\theta_s)/P(x)} = \frac{P(x, \theta^*)}{P(x, \theta_s)}$$
+$$\rho = \frac{P(\theta^\star|x)}{P(\theta_s|x)} = \frac{P(x|\theta^\star) P(\theta^\star)/P(x)}{P(x|\theta_s) P(\theta_s)/P(x)} = \frac{P(x, \theta^\star)}{P(x, \theta_s)}$$
 
 Here is the trick: the normalizing constants cancel out. We only have to compute the joint probability -- usually, the log joint probability -- of the data and the parameter values. TFP performs probabilistic inference by evaluating the model parameters using a `joint_log_prob` function, which we define below.
 
@@ -269,7 +266,7 @@ Then,
 
 * If $\rho<1$, set $\theta_{s+1}=\theta^*$ with probability $\rho$, otherwise set $\theta_{s+1}=\theta_s$ (this is where we use the standard uniform distribution -- in practice you draw a sample $u \sim \mathrm{Unif}(0,1)$ and check if $\rho > u$; if it is you accept the proposal)
 
-To sum up, we accept a proposed move to $\theta^*$ whenever the density of the (unnormalzied) joint distribution evaluated at $\theta^*$ is larger than the value of the unnormalized joint distribution evaluated at $\theta_s$ -- so $\theta$ will more often be found in places where the unnormalized joint distribution is denser.
+To sum up, we accept a proposed move to $\theta^\star$ whenever the density of the (unnormalzied) joint distribution evaluated at $\theta^\star$ is larger than the value of the unnormalized joint distribution evaluated at $\theta_s$ -- so $\theta$ will more often be found in places where the unnormalized joint distribution is denser.
 
 If this was all we accepted, $\theta$ would get stuck at a local mode of the target distribution, so we also accept occasional moves to lower density regions.
 

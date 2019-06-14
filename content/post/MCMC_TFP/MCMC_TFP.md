@@ -1,6 +1,3 @@
-
-#Bayesian Inference with MCMC
-
 This blog post is an attempt at trying to explain the intuition behind MCMC sampling: specifically, a particular instance of the __Metropolis-Hasting algorithm__. Critically, we'll be using `TensonFlow Probability` code examples to explain the various concepts. 
 
 ## The Problem
@@ -170,7 +167,7 @@ The important thing to acknowledge is that, without conjugacy, we would not even
 
 When we do not have access to the analytic form of the posterior distribution we can resort to MCMC methods. The basic idea is that we can find strategies to sample from the posterior distribution, even if we cannot "write it down". These samples are then used to approximate the posterior distribution. One simple strategy to get samples from the posterior distribution is the __Rejection Sampling algorithm__.
 
-###Rejection Sampling
+### Rejection Sampling
 
 The basic idea of rejection sampling is to sample from an _instrumental distribution_ and reject samples
 that are "unlikely" under the _target distribution_. Here we consider a very specific instance of rejection sampling:

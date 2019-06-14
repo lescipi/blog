@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.3.1">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Pietro Lesci">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="MCMC sampling: The Random-Walk Metropolis-Hasting algorithm explained with TensonFlow Probability">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/mcmc_tfp/">
+
+  
+
+
+  
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.0/css/all.css" integrity="sha384-aOkxzJ5uQz7WBObEZcHvV5JvRW3TUc2rNPA7pe3AwnsUohiw1Vj2Rgx2KSOkF5+h" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.css" integrity="sha256-ygkqlh3CYSUri3LhQxzdcm0n1EQvH2Y+U5S2idbLtxs=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+
+    
+
+  
+
+  
+  
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,400italic,700|Roboto+Mono">
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.min.8b0ade0dc3825de411be68268eb3bb82.css">
+
+  
+
+  
+  
+  
+
+  
+
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" type="image/png" href="/img/icon.png">
+  <link rel="apple-touch-icon" type="image/png" href="/img/icon-192.png">
+
+  <link rel="canonical" href="/post/mcmc_tfp/">
+
+  
+  
+  
+  
+    
+  
+  <meta property="twitter:card" content="summary_large_image">
+  
+  <meta property="twitter:site" content="@lescipi">
+  <meta property="twitter:creator" content="@lescipi">
+  
+  <meta property="og:site_name" content="Pietro Lesci">
+  <meta property="og:url" content="/post/mcmc_tfp/">
+  <meta property="og:title" content="Bayesian Inference with MCMC | Pietro Lesci">
+  <meta property="og:description" content="MCMC sampling: The Random-Walk Metropolis-Hasting algorithm explained with TensonFlow Probability"><meta property="og:image" content="/post/mcmc_tfp/featured.png">
+  <meta property="og:locale" content="en-us">
+  
+  <meta property="article:published_time" content="2019-06-11T00:00:00&#43;00:00">
+  
+  <meta property="article:modified_time" content="2019-06-11T17:41:23&#43;02:00">
+  
+
+  
+
+  
+
+  <title>Bayesian Inference with MCMC | Pietro Lesci</title>
+
+</head>
+<body id="top" data-spy="scroll" data-target="#TableOfContents" data-offset="71" >
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" role="textbox" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+
+<nav class="navbar navbar-light fixed-top navbar-expand-lg py-0" id="navbar-main">
+  <div class="container">
+
+    
+      <a class="navbar-brand" href="/">Pietro Lesci</a>
+      
+      <button type="button" class="navbar-toggler" data-toggle="collapse"
+              data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+        <span><i class="fas fa-bars"></i></span>
+      </button>
+      
+
+    
+    <div class="collapse navbar-collapse" id="navbar">
+
+      
+      
+      <ul class="navbar-nav ml-auto">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#about">
+            
+            <span>Home</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts">
+            
+            <span>Posts</span>
+            
+          </a>
+        </li>
+
+        
+        
+
+      
+
+        
+
+        
+        <li class="nav-item">
+          <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+        </li>
+        
+
+        
+
+        
+
+      </ul>
+
+    </div>
+  </div>
+</nav>
+
+
+<article class="article" itemscope itemtype="http://schema.org/Article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="article-header d-xl-none">
+  <div class="featured-image" style="background-image: url('/post/mcmc_tfp/featured_hu7ed88a8d2e2ee8e5e57a140d78aedada_23944_800x0_resize_lanczos_2.png');"></div>
+  
+</div>
+
+
+<div class="container-fluid split-header d-none d-xl-block">
+  <div class="row">
+    <div class="col-6">
+      <div class="split-header-content">
+        <h1 itemprop="name">Bayesian Inference with MCMC</h1>
+
+        
+
+        
+
+
+
+<meta content="2019-06-11 00:00:00 &#43;0000 UTC" itemprop="datePublished">
+<meta content="2019-06-11 17:41:23 &#43;0200 CEST" itemprop="dateModified">
+
+<div class="article-metadata">
+
+  
+  
+  
+  
+  <div>
+    
+
+
+
+  <span itemprop="author name" itemtype="http://schema.org/Person"><a href="/authors/admin/">Pietro Lesci</a></span>
+
+  </div>
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    <time>Jun 11, 2019</time>
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    10 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+
+  
+
+</div>
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=Bayesian%20Inference%20with%20MCMC&amp;url=%2fpost%2fmcmc_tfp%2f"
+         target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u=%2fpost%2fmcmc_tfp%2f"
+         target="_blank" rel="noopener">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=%2fpost%2fmcmc_tfp%2f&amp;title=Bayesian%20Inference%20with%20MCMC"
+         target="_blank" rel="noopener">
+        <i class="fab fa-linkedin-in"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=%2fpost%2fmcmc_tfp%2f&amp;title=Bayesian%20Inference%20with%20MCMC"
+         target="_blank" rel="noopener">
+        <i class="fab fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=Bayesian%20Inference%20with%20MCMC&amp;body=%2fpost%2fmcmc_tfp%2f">
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="split-header-image">
+        <img src="/post/mcmc_tfp/featured_hu7ed88a8d2e2ee8e5e57a140d78aedada_23944_680x500_fill_q90_lanczos_smart1_2.png" itemprop="image" alt="">
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="article-container d-xl-none">
+  <h1 itemprop="name">Bayesian Inference with MCMC</h1>
+
+  
+
+  
+
+
+
+<meta content="2019-06-11 00:00:00 &#43;0000 UTC" itemprop="datePublished">
+<meta content="2019-06-11 17:41:23 &#43;0200 CEST" itemprop="dateModified">
+
+<div class="article-metadata">
+
+  
+  
+  
+  
+  <div>
+    
+
+
+
+  <span itemprop="author name" itemtype="http://schema.org/Person"><a href="/authors/admin/">Pietro Lesci</a></span>
+
+  </div>
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    <time>Jun 11, 2019</time>
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    10 min read
+  </span>
+  
+
+  
+  
+
+  
+  
+
+  
+    
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    <li>
+      <a class="twitter"
+         href="https://twitter.com/intent/tweet?text=&amp;url="
+         target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+    <li>
+      <a class="facebook"
+         href="https://www.facebook.com/sharer.php?u="
+         target="_blank" rel="noopener">
+        <i class="fab fa-facebook-f"></i>
+      </a>
+    </li>
+    <li>
+      <a class="linkedin"
+         href="https://www.linkedin.com/shareArticle?mini=true&amp;url=&amp;title="
+         target="_blank" rel="noopener">
+        <i class="fab fa-linkedin-in"></i>
+      </a>
+    </li>
+    <li>
+      <a class="weibo"
+         href="http://service.weibo.com/share/share.php?url=&amp;title="
+         target="_blank" rel="noopener">
+        <i class="fab fa-weibo"></i>
+      </a>
+    </li>
+    <li>
+      <a class="email"
+         href="mailto:?subject=&amp;body=">
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+  
+
+</div>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style" itemprop="articleBody">
+      
+
+<h2 id="the-problem">The Problem</h2>
+
+<p>First, let&rsquo;s import our modules. Note that we will use TensorFlow 2 Beta and we will use the TFP nightly distribution with works fine with TF2.</p>
+
+<pre><code class="language-python">!pip install tensorflow==2.0.0-beta0 
+!pip install tfp-nightly
+</code></pre>
+
+<pre><code class="language-python">import numpy as np
+import tensorflow as tf
+import tensorflow_probability as tfp
+tfd = tfp.distributions
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+tf.random.set_seed(1994)
+sns.set_context('paper')
+sns.set_style('whitegrid')
+</code></pre>
+
+<p>Let&rsquo;s generate some data: 20 points from a Gaussian distribution centered around zero.
+Note that in TFP the Gaussian distribution is parametrized by mean and standard deviation, not the variance.</p>
+
+<pre><code class="language-python">observed = tfd.Normal(loc=0., scale=1.).sample(20)
+sns.distplot(observed, kde=False)
+sns.despine();
+</code></pre>
+
+<p><img src="output_7_0.png" alt="png" /></p>
+
+<p>We have some observations $x$.</p>
+
+<p>Usually (in parametric statistics) we assume a data-generating process, i.e. a model $P(x|\theta)$, from which the data we see had been sampled. Looking at the data we come up, somehow, with the idea that a good model for our data is the Gaussian distribution. In other words, we assume that the data are normally distributed.</p>
+
+<p>The model often depends on unknown parameters $\theta$. They can be unknown because they are intrinsecally random or because simply we do not know them. A normal distribution has two parameters: the mean, $\mu$, and the standard deviation, $\sigma$. For simplicity, we assume we know $\sigma=1$ and we want to make inference on $\mu$ only, that is $\theta \equiv \mu$.</p>
+
+<p>From a Bayesian viewpoint, we have to assign a prior distribution for this parameter, i.e. $P(\theta)$. Let&rsquo;s also assume a normal distribution as a prior for $\mu$. Our model can be written as follows (we assumed that the prior is a Gaussian distribution with mean 4 and stardard deviation 2)</p>
+
+<p>$$x_i|\mu \stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1)$$</p>
+
+<p>$$\mu \sim \mathcal{N}(\mu_0 = 4, \sigma_0 = 2)$$</p>
+
+<p>In the Bayesian Stat lingo, this way of writing the model derives from the fact that knowing nothing about the joint distribution of $x$ we can assume <a href="https://en.wikipedia.org/wiki/Exchangeable_random_variables" target="_blank">exchangeability</a>. By the <a href="https://en.wikipedia.org/wiki/De_Finetti%27s_theorem" target="_blank">De Finetti&rsquo;s Theorem</a> we arrive to the above formulation. Anyway, this goes beyond the scope of this blog post. For more information on Bayesian Analysis look at <a href="http://www.stat.columbia.edu/~gelman/book/" target="_blank">Gelman et al. book</a>.</p>
+
+<pre><code class="language-python">#Prior
+mu_0, sigma_0 = 4., 2.
+prior = tfd.Normal(mu_0, sigma_0)
+
+#Likelihood params
+mu, sigma = tf.reduce_mean(observed), 1. #use the sample mean as guess for mu
+likelihood = tfd.Normal(mu, sigma) 
+</code></pre>
+
+<pre><code class="language-python">sns.distplot(prior.sample(10**5))
+sns.distplot(likelihood.sample(10**5))
+sns.despine()
+plt.legend(labels=['Prior','Likelihood'])
+plt.xlim(-5, 7);
+</code></pre>
+
+<p><img src="output_12_0.png" alt="png" /></p>
+
+<p>In the Bayesian framework, inference, i.e. knowing something more about the unknown parameters, is solved by the Bayes formula</p>
+
+<p>$$P(\theta|x)=\frac{P(x|\theta)P(\theta)}{P(x)}$$</p>
+
+<p>The posterior distribution $P(\theta|x)$ &ndash; that is, what we know about our model parameters $\theta$ after having seen thet data $x$ &ndash; is our quantity of interest.</p>
+
+<p>To compute it, we multiply the <strong>prior</strong> $P(\theta)$ (what we think about $\theta$ before we have seen any data) and the <strong>likelihood</strong> $P(x|\theta)$, dividing by the <strong>evidence</strong> $P(x)$ (i.e. the evidence that the data x was generated by this model).</p>
+
+<p>However, let&rsquo;s take a closer look at the denominator, $P(x)$. We do not observe it, but we can compute this quantity by integrating over all possible parameter values:</p>
+
+<p>$$P(x)=\int_\Theta P(x,\theta) \ d\theta$$</p>
+
+<p>This is the key difficulty with the Bayes formula &ndash; while the formula looks pretty enough, for even slightly non-trivial models we cannot compute the posterior in a closed-form way.</p>
+
+<p><strong>NOTE</strong>: $P(x)$ is a normalizing constant. Up to this normalizing constant, we know exactly how the <em>unnormalized</em> posterior distribution looks like, i.e.</p>
+
+<p>$$P(\theta|x) \propto P(x|\theta) P(\theta)$$</p>
+
+<p>(where $\propto$ mean &ldquo;proportional to&rdquo;). Since we defined both terms on the rhs, <strong>we do know how to sample from the unnormalized posterior distribution</strong></p>
+
+<p>Furthermore, by the product rule  &ndash; $P(A, B) = P(A|B) P(B)$ &ndash; we can write</p>
+
+<p>$$P(\theta|x) \propto P(x, \theta)$$</p>
+
+<p>meaning that the unnormalized posterior is proportional to the joint distribution of $x$ and $\theta$.</p>
+
+<p>nack to the example. The prior distribution we defined is convenient because we can actually compute the posterior distribution analytically. That&rsquo;s because for a normal likelihood with known standard deviation, the normal prior distribution for $\mu$ is <a href="https://en.wikipedia.org/wiki/Conjugate_prior" target="_blank">conjugate</a>, i.e. our posterior distribution will belong to the same family of distributions of the prior.</p>
+
+<p>Therefore, we know that our posterior distribution for $\mu$ is also normal. We can easily look up on wikipedia how we can compute the parameters of the posterior. For a mathematical derivation see <a href="https://docs.google.com/viewer?a=v&amp;pid=sites&amp;srcid=ZGVmYXVsdGRvbWFpbnxiYXllc2VjdHxneDplNGY0MDljNDA5MGYxYTM" target="_blank">here</a>.</p>
+
+<p>Let&rsquo;s define a function which computes the updates for the parameters of the posterior distribution analytically</p>
+
+<pre><code class="language-python">def get_param_updates(data, sigma, prior_mu, prior_sigma): #sigma is known
+    n = len(data)
+    sigma2 = sigma**2
+    prior_sigma2 = prior_sigma**2
+    x_bar = tf.reduce_mean(data)
+    
+    post_mu = ((sigma2 * prior_mu) + (n * prior_sigma2 * x_bar)) / ((n * prior_sigma2) + (sigma2))
+    post_sigma2 = (sigma2 * prior_sigma2) / ((n * prior_sigma2) + sigma2)
+    post_sigma = tf.math.sqrt(post_sigma2)
+    
+    return post_mu, post_sigma
+</code></pre>
+
+<pre><code class="language-python">#Posterior
+mu_n, sigma_n = get_param_updates(observed,
+                                  sigma=1, 
+                                  prior_mu=mu_0, 
+                                  prior_sigma=sigma_0)
+posterior = tfd.Normal(mu_n, sigma_n)
+</code></pre>
+
+<pre><code class="language-python">sns.distplot(prior.sample(10**5))
+sns.distplot(likelihood.sample(10**5))
+sns.distplot(posterior.sample(10**5))
+sns.despine()
+plt.legend(labels=['Prior','Likelihood', 'Posterior'])
+plt.xlim(-5, 7);
+</code></pre>
+
+<p><img src="output_20_0.png" alt="png" /></p>
+
+<p>This shows our quantity of interest: the probability of $\mu$&rsquo;s values after having seen the data, taking our prior information into account.</p>
+
+<p>The important thing to acknowledge is that, without conjugacy, we would not even be capable of sketching the posterior distribution: we would not know its shape at all. Let&rsquo;s assume, however, that our prior was not conjugate and we could not solve this by hand &ndash; which is usually the case.</p>
+
+<h2 id="approximation-methods">Approximation methods</h2>
+
+<p>When we do not have access to the analytic form of the posterior distribution we can resort to MCMC methods. The basic idea is that we can find strategies to sample from the posterior distribution, even if we cannot &ldquo;write it down&rdquo;. These samples are then used to approximate the posterior distribution. One simple strategy to get samples from the posterior distribution is the <strong>Rejection Sampling algorithm</strong>.</p>
+
+<p>###Rejection Sampling</p>
+
+<p>The basic idea of rejection sampling is to sample from an <em>instrumental distribution</em> and reject samples
+that are &ldquo;unlikely&rdquo; under the <em>target distribution</em>. Here we consider a very specific instance of rejection sampling:
+the <strong>Naive Rejection Sampling</strong>.</p>
+
+<p>Suppose that you can sample from a joint distribution $P(X, \theta)$ (where $X$ is random as well) &ndash; we have seen that we can sample from it since using the product rule we get $P(X, \theta) = P(X|\theta) P(\theta)$, which are both defined by us, so we know how to sample from them!</p>
+
+<p>We are interested in sampling $\theta$ from the conditional distribution $P(\theta|X = x)$, for some fixed values of $x$ &ndash; i.e. the observed data.</p>
+
+<p>The Naive Rejection Sampling algorithm works as follows:</p>
+
+<ol>
+<li><p>Sample $\theta$ from the prior $P(\theta)$ and X from the likelihood $P(X|\theta)$</p></li>
+
+<li><p>If $X = x$ (the observed data) , accept $\theta$ as a sample from the posterior $P(\theta|X = x)$ , otherwise return to (1) and repeat</p></li>
+</ol>
+
+<p>Each time you return to step 1, the samples of $\theta$ are independent from the previous ones.</p>
+
+<p>Pros: step 1 is often practical because both the prior and the likelihood are often easy-to-sample distributions. Cons: the clear shortcoming is can be very unlikely and thus step 2 will very rarely (if ever) accept the candidate sample $\theta$.</p>
+
+<p>This simple implementation of rejection sampling is enough to provide some intuition and motivate the use of more sophisticated and robust sampling algorithms based on Markov chains.</p>
+
+<p>###MCMC: The Random-Walk Metropolis-Hasting algorithm</p>
+
+<p>There is a large family of algorithms that perform MCMC. Most of these algorithms can be expressed at a high level as follows:</p>
+
+<ol>
+<li><p>Start at current position (i.e. a value for $\theta$, say $\theta^{(1)}$)</p></li>
+
+<li><p>Propose moving to a new position (say, $\theta^*$)</p></li>
+
+<li><p>Accept/Reject the new position based on the position&rsquo;s adherence to the data and prior distributions.</p></li>
+
+<li><ul>
+<li>If you accept: Move to the new position (i.e. $\theta^{(2)}=\theta^*$) and return to Step 1</li>
+<li>Else: Do not move to new position. Return to Step 1.</li>
+</ul></li>
+
+<li><p>After a large number of iterations, return all accepted positions.</p></li>
+</ol>
+
+<p>Based on how you implement the above steps you get the various MCMC algorithm. Here we will review the <strong>Random-Walk Metropolis-Hasting algorithm</strong>.</p>
+
+<p>As we have seen, the main drawback of the rejection sampling is that it is not efficient &ndash; it is unlikely to get exactly $X = x$, especially when it is high-dimensional.</p>
+
+<p>One way around this problem is to allow for &ldquo;local updates&rdquo;, i.e. let the proposed value depend on the last accepted value.
+This makes it easier to come up with a suitable (conditional) proposal, however at the price of yielding a Markov chain, $(\theta<em>s)</em>{s\geq1}$,
+instead of a sequence of independent <strong>realizations</strong> &ndash; putting it simply, a sequence of random variables is a <em>Markov Chain</em> if the future state only depends on the present state.</p>
+
+<p>The RW-MH proposes a new $\theta^*$ according to</p>
+
+<p>$$\theta^* = \theta_{s} + \varepsilon, \quad \varepsilon \sim g$$</p>
+
+<p>where $g$ may be any simmetric distribution. Usually, $g = \mathcal{N}(0, \tau)$, so that the proposed new value is simply a draw from $\mathcal{N}(\theta_{s}, \tau)$.</p>
+
+<p>At first, you find starting parameter position (can be randomly chosen), lets fix it arbitrarily to</p>
+
+<pre><code class="language-python">mu_current = 2.
+</code></pre>
+
+<p>The critical point is how you propose the new position (that&rsquo;s the Markov part). You can be very naive or very sophisticated about how you come up with that proposal. The RW-MH algorithm is very naive and just takes a sample from a Gaussian distribution (or whatever simmetric distribution you like) centered on the current value with a certain standard deviation, usually called <em>proposal width</em> that will determine how far you propose jumps.</p>
+
+<pre><code class="language-python">proposal_width = 1.
+mu_proposal = tfd.Normal(mu_current, proposal_width).sample()
+</code></pre>
+
+<p>Next, you evaluate whether that&rsquo;s a good place to jump to or not. To evaluate if it is good you compute the ratio</p>
+
+<p>$$\rho = \frac{P(\theta^\star|x)}{P(\theta_s|x)} = \frac{P(x|\theta^\star) P(\theta^\star)/P(x)}{P(x|\theta_s) P(\theta_s)/P(x)} = \frac{P(x, \theta^\star)}{P(x, \theta_s)}$$</p>
+
+<p>Here is the trick: the normalizing constants cancel out. We only have to compute the joint probability &ndash; usually, the log joint probability &ndash; of the data and the parameter values. TFP performs probabilistic inference by evaluating the model parameters using a <code>joint_log_prob</code> function, which we define below.</p>
+
+<p>Then,</p>
+
+<ul>
+<li><p>If $\rho\geq1$, set $\theta^{s+1}=\theta^*$</p></li>
+
+<li><p>If $\rho<1$, set $\theta_{s+1}=\theta^*$ with probability $\rho$, otherwise set $\theta_{s+1}=\theta_s$ (this is where we use the standard uniform distribution -- in practice you draw a sample $u \sim \mathrm{Unif}(0,1)$ and check if $\rho > u$; if it is you accept the proposal)</p></li>
+</ul>
+
+<p>To sum up, we accept a proposed move to $\theta^\star$ whenever the density of the (unnormalzied) joint distribution evaluated at $\theta^\star$ is larger than the value of the unnormalized joint distribution evaluated at $\theta_s$ &ndash; so $\theta$ will more often be found in places where the unnormalized joint distribution is denser.</p>
+
+<p>If this was all we accepted, $\theta$ would get stuck at a local mode of the target distribution, so we also accept occasional moves to lower density regions.</p>
+
+<pre><code class="language-python">def joint_log_prob(data, proposal):
+  prior = tfd.Normal(mu_0, sigma_0)
+  likelihood = tfd.Normal(proposal, sigma)
+  
+  return prior.log_prob(proposal) + tf.reduce_mean(likelihood.log_prob(data))
+</code></pre>
+
+<pre><code class="language-python">p_accept = joint_log_prob(observed, mu_proposal) / joint_log_prob(observed, mu_current)
+</code></pre>
+
+<pre><code class="language-python">if p_accept &gt; tfd.Uniform().sample():
+  mu_current = proposal
+  print('Proposal accepted')
+</code></pre>
+
+<pre><code>Proposal accepted
+</code></pre>
+
+<p>In TFP the algorithm is implemented as follows.</p>
+
+<p>First we define <em>how</em> the step should be taken, i.e. how the proposal should be made. Since we are implementing the RW-MH algorithm we use the function <code>tfp.mcmc.RandomWalkMetropolis</code>. It takes as argument the unnormalized join distribution that it will use to compute the acceptance ratio. The only thinkg we have to remenber is that we have to &ldquo;lock the data&rdquo; or &ldquo;define a closure&rdquo; over our joint_log_prob function. In other words, fix the data input of the function <code>joint_log_prob</code></p>
+
+<pre><code class="language-python">def unnormalized_log_posterior(proposal):
+  return joint_log_prob(observed, proposal)
+</code></pre>
+
+<pre><code class="language-python">rwm = tfp.mcmc.RandomWalkMetropolis(
+    target_log_prob_fn=unnormalized_log_posterior
+)
+</code></pre>
+
+<p>Secondly, we have to define the initial state of the chain, say $\theta_0$. We choose this arbitrarily.</p>
+
+<pre><code class="language-python">initial_state = tf.constant(1.)
+</code></pre>
+
+<p>Finally, we can sample the chain (without storing &ldquo;additional information&rdquo; <code>trace_fn=None</code>)</p>
+
+<pre><code class="language-python">trace, kernel_results = tfp.mcmc.sample_chain(
+    num_results=2*10**4,
+    num_burnin_steps=2000,
+    current_state=initial_state,
+    num_steps_between_results=5,
+    kernel=rwm
+)
+</code></pre>
+
+<pre><code>/usr/local/lib/python3.6/dist-packages/tensorflow_probability/python/mcmc/sample.py:335: UserWarning: Tracing all kernel results by default is deprecated. Set the `trace_fn` argument to None (the future default value) or an explicit callback that traces the values you are interested in.
+  warnings.warn(&quot;Tracing all kernel results by default is deprecated. Set &quot;
+</code></pre>
+
+<pre><code class="language-python">plt.plot(trace);
+</code></pre>
+
+<p><img src="output_47_0.png" alt="png" /></p>
+
+<pre><code class="language-python">sns.distplot(trace);
+</code></pre>
+
+<p><img src="output_48_0.png" alt="png" /></p>
+
+<pre><code class="language-python">posterior.mean().numpy()
+</code></pre>
+
+<pre><code>0.063399814
+</code></pre>
+
+<pre><code class="language-python">tf.reduce_mean(trace).numpy()
+</code></pre>
+
+<pre><code>0.8029209
+</code></pre>
+
+<pre><code class="language-python">sns.distplot(prior.sample(10**5))
+sns.distplot(likelihood.sample(10**5))
+sns.distplot(trace)
+sns.despine()
+plt.legend(labels=['Prior','Likelihood', 'MCMC Posterior'])
+plt.xlim(-5, 7);
+</code></pre>
+
+<p><img src="output_51_0.png" alt="png" /></p>
+
+<pre><code class="language-python">
+</code></pre>
+
+    </div>
+
+    
+
+
+
+    
+      
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+  
+
+
+
+
+
+  
+  <div class="media author-card" itemscope itemtype="http://schema.org/Person">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_hu4c5d379f6941b021f447fd2caa8ad05b_25500_250x250_fill_q90_lanczos_center.jpg" itemprop="image" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title" itemprop="name"><a href="/authors/admin/">Pietro Lesci</a></h5>
+      
+      <p class="card-text" itemprop="description">Passionate musician, statistics enthusiast</p>
+      <ul class="network-icon" aria-hidden="true">
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+          <li>
+            <a itemprop="sameAs" href="mailto:lescipietro@gmail.com" >
+              <i class="fas fa-envelope"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://twitter.com/lescipi" target="_blank" rel="noopener">
+              <i class="fab fa-twitter"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://github.com/lescipi" target="_blank" rel="noopener">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        
+          
+          
+          
+            
+          
+          
+          
+          
+          
+            
+          
+          <li>
+            <a itemprop="sameAs" href="https://www.linkedin.com/in/pietrolesci" target="_blank" rel="noopener">
+              <i class="fab fa-linkedin"></i>
+            </a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+
+
+      
+      
+    
+
+    
+
+    
+
+
+  </div>
+</article>
+
+<div class="container">
+  <footer class="site-footer">
+  
+  <p class="powered-by">
+    <a href="/privacy/">Privacy Policy</a>
+  </p>
+  
+
+  <p class="powered-by">
+    &copy; 2019 &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" id="back_to_top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+</div>
+
+
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    
+
+    
+    
+    
+    <script src="/js/mathjax-config.js"></script>
+    
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.2.5/jquery.fancybox.min.js" integrity="sha256-X5PoE3KU5l+JcX+w09p/wHl9AzK333C4hJ2I9S5mD4M=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js" integrity="sha256-aYTdUrn6Ow1DDgh5JTc3aDGnnju48y/1c8s1dgkYPQ8=" crossorigin="anonymous"></script>
+        
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/r.min.js"></script>
+        
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/languages/python.min.js"></script>
+        
+      
+
+      
+      
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-AMS_CHTML-full" integrity="sha256-GhM+5JHb6QUzOQPXSJLEWP7R73CbkisjzK5Eyij4U9w=" crossorigin="anonymous" async></script>
+      
+    
+
+    
+    
+
+    
+    
+    
+
+    
+    
+    <script>hljs.initHighlightingOnLoad();</script>
+    
+
+    
+    
+    <script>
+      const search_index_filename = "/index.json";
+      const i18n = {
+        'placeholder': "Search...",
+        'results': "results found",
+        'no_results': "No results found"
+      };
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a634eb963f72ae9bd331e70f2b1bc2d8.js"></script>
+
+  </body>
+</html>
+
