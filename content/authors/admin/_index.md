@@ -6,7 +6,7 @@ education:
   courses:
   - course: MSc in Economic and Social Sciences
     institution: Bocconi University
-    year: 2019
+    year: 2018
   - course: BSc in Economics and Management 
     institution: Catholic University of Sacred Heart
     year: 2016
@@ -16,6 +16,7 @@ interests:
 - Bayesian Deep Learning
 - Bayesian Nonparametrics
 - Statistical Machine Learning
+- Probabilistic Programming
 name: Pietro Lesci
 organizations:
 - name: Bocconi University
@@ -34,10 +35,13 @@ social:
 - icon: github
   icon_pack: fab
   link: https://github.com/lescipi
+- icon: linkedin
+  icon_pack: fab
+  link: https://www.linkedin.com/in/pietrolesci
 superuser: true
 user_groups:
 - Researchers
 - Visitors
 ---
 
-Pietro Lesci is a recent graduate at Bocconi University and former trainee at European Central Bank in the Directorate of General Statistics.
+Pietro Lesci is a recent graduate at Bocconi University and a former trainee at the European Central Bank in the Directorate of General Statistics. He is a passionate musician and a machine learning enthusiast.
