@@ -447,3 +447,4 @@ plt.legend(labels=['Analytic Posterior', 'PyMC Posterior', 'TFP Posterior']);
 
 
 As you might notice, just after $10^4$ samples, the NUTS is able to retrieve the true posterior (they are in fact indistinguishable).
+
