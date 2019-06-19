@@ -19,7 +19,7 @@ copyright = "&copy; 2019"
 googleAnalytics = ""
 
 # Enable comments by entering your Disqus shortname
-disqusShortname = ""
+disqusShortname = "lescipi"
 
 ############################
 ## Advanced options below ##
@@ -29,7 +29,7 @@ disqusShortname = ""
 theme = "hugo-academic"
 
 # Get last modified date for content from Git?
-enableGitInfo = true
+enableGitInfo = false
 
 # Default language to use (if you setup multilingual support)
 defaultContentLanguage = "en"

@@ -2,13 +2,15 @@
 authors:
 - admin
 categories: []
-date: "2019-06-11T00:00:00Z"
+comments: true 
+date: "2019-06-19T00:00:00Z"
+lastmod: "2019-06-19T00:00:00Z"
+publishDate: "2019-06-19T00:00:00Z"
 draft: false
 featured: false
 image:
   caption: ""
   focal_point: ""
-publishDate: "2019-06-19T00:00:00Z"
 projects: []
 summary: "MCMC sampling: The Random-Walk Metropolis-Hasting algorithm explained with TensonFlow Probability"
 tags: []
