@@ -39,7 +39,7 @@ math = true
 #   Anonymize IP in Google Analytics (if enabled)
 privacy_pack = false
 
-# Date and time format (refer to https://sourcethemes.com/academic/docs/customization/#date-format )
+# Date and time format (refer to https://sourcethemes.com/academic/docs/customization/#date-format)
 #   Examples: "Mon, Jan 2, 2006" or "2006-01-02"
 date_format = "Jan 2, 2006"
 #   Examples: "3:04 pm" or "15:04"
@@ -117,7 +117,7 @@ reading_time = true
 comment_count = true
 
 # Display next/previous section pager? (true/false)
-section_pager = false
+section_pager = true
 docs_section_pager = true  # Display pager in Docs layout (e.g. tutorials)?
 
 # Enable in-built social sharing buttons? (true/false)
