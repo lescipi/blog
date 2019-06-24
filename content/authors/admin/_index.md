@@ -44,4 +44,4 @@ user_groups:
 - Visitors
 ---
 
-Pietro Lesci is a recent graduate at Bocconi University and a former trainee at the European Central Bank in the Directorate of General Statistics. He is a passionate musician and a machine learning enthusiast.
+Pietro Lesci is a recent graduate at Bocconi University and a former trainee at the European Central Bank in the Directorate of General Statistics. First of six, he is a passionate musician and a machine learning enthusiast.

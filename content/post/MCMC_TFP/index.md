@@ -3,6 +3,11 @@ authors:
 - admin
 categories: []
 comments: true 
+links:
+  - icon_pack: fab
+    icon: []
+    name: Run in Colab
+    url: 'https://colab.research.google.com/drive/1XJ3dDH7uCbqg3P7HHlkFz9wGawFZJgYX'
 date: "2019-06-19T00:00:00Z"
 lastmod: "2019-06-19T00:00:00Z"
 publishDate: "2019-06-19T00:00:00Z"
@@ -71,28 +76,36 @@ The model often depends on unknown parameters $\theta$. They can be unknown beca
 
 From a Bayesian viewpoint, we have to define a prior distribution for this parameter, i.e. $P(\theta)$. Let's also assume a normal distribution as a prior for $\mu$. Our model can be written as follows (we assumed that the prior is a Gaussian distribution with mean 4 and stardard deviation 2)
 
-$$x_i|\mu \stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1)$$
+$$x_i|\mu \stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1), \quad i = 1,\dots,N$$
 
 $$\mu \sim \mathcal{N}(\mu_0 = 4, \sigma_0 = 2)$$
 
 
 
-In the Bayesian Stat lingo, this way of writing the model derives from the fact that knowing nothing about the joint distribution of the $x$'s' we can assume [exchangeability](https://en.wikipedia.org/wiki/Exchangeable_random_variables). By the [De Finetti's Theorem](https://en.wikipedia.org/wiki/De_Finetti%27s_theorem) we arrive to the above formulation. Anyway, this goes beyond the scope of this blog post. For more information on Bayesian Analysis look at [Gelman et al. book](http://www.stat.columbia.edu/~gelman/book/).
+In the Bayesian Stat lingo, this way of writing the model derives from the fact that knowing nothing about the joint distribution of the $x_i$'s we can assume [exchangeability](https://en.wikipedia.org/wiki/Exchangeable_random_variables). By the [De Finetti's Theorem](https://en.wikipedia.org/wiki/De_Finetti%27s_theorem) we arrive to the above formulation. Anyway, this goes beyond the scope of this blog post. For more information on Bayesian Analysis look at [Gelman et al. book](http://www.stat.columbia.edu/~gelman/book/).
 
 
 ```python
-# prior
+# prior 
 mu_0, sigma_0 = 4., 2.
 prior = tfd.Normal(mu_0, sigma_0)
 
-# likelihood
+# likelihood 
 mu, sigma = prior.sample(1), 1. # use a sample from the prior as guess for mu
 likelihood = tfd.Normal(mu, sigma) 
 ```
 
 Since we do not know the mean of the Gaussian distribution which generated the data, we use a sample from the prior distribution as a guess for $\mu$ in order to be able to draw it (we need a value), the likelihood has a mean similar to that of the prior distribution.
 
+> __Digression__: note that actually what I called likelihood, is the likelihood for one specific datapoint -- call it $\mathrm{likelihood}_i, i=1,\dots,N$. The "proper" likelihood function is (given that we have an $i.i.d.$ sample) equal to the product of the "per-datapoint" likelihoods
 
+> $$\mathcal{L}(\mu; x) = \prod_{i=1}^n \underbrace{\frac{1}{\sqrt{2\pi\sigma^2}} \exp \left\\{-\frac{(x_i-\mu)^2}{2\sigma^2}\right\\}}\_{\mathcal{L}(\mu; x_i)}$$
+
+> When we consider the loglikelihood, obviously, for an $i.i.d.$ sample, the loglikelihood is the sum of the individual "per-datapoint" likelihoods
+
+> $$\mathcal{l}(\mu; x) = \sum_{i=1}^n \mathcal{l}(\mu; x_i)$$
+
+> Usually, the likelihood is denoted by $\mathcal{L}(\mu; x)$ or $p(x|\mu)$.
 
 In the graph below, I plot both the prior and the likelihood, as well as the true data-generating process with the data plotted as a rug
 
@@ -115,6 +128,7 @@ In the Bayesian framework, inference, i.e. knowing something more about the unkn
 
 $$P(\theta|x)=\frac{P(x|\theta)P(\theta)}{P(x)}$$
 
+
 The posterior distribution $P(\theta|x)$ -- that is, what we know about our model parameters $\theta$ after having seen thet data $x$ -- is our quantity of interest. 
 
 To compute it, we multiply the __prior__ $P(\theta)$ (what we think about $\theta$ before we have seen any data) and the __likelihood__ $P(x|\theta)$, dividing by the __evidence__ $P(x)$ (a.k.a. _marginal likelihood_).
@@ -129,17 +143,17 @@ This is the key difficulty with the Bayes formula -- while the formula looks pre
 
 
 
-__NOTE__: $P(x)$ is a normalizing constant. Up to this normalizing constant, we know exactly how the _unnormalized_ posterior distribution looks like, i.e.
+> __Digression__: $P(x)$ is a normalizing constant. Up to this normalizing constant, we know exactly how the _unnormalized_ posterior distribution looks like, i.e.
 
-$$P(\theta|x) \propto P(x|\theta) P(\theta)$$
+> $$P(\theta|x) \propto P(x|\theta) P(\theta)$$
 
-(where $\propto$ mean "proportional to"). Since we defined both terms on the rhs, __we DO know how to sample from the unnormalized posterior distribution__
+> (where $\propto$ mean "proportional to"). Since we defined both terms on the rhs, __we DO know how to sample from the unnormalized posterior distribution__
 
-Furthermore, by the product rule  -- $P(A, B) = P(A|B) P(B)$ -- we can write
+> Furthermore, by the product rule  -- $P(A, B) = P(A|B) P(B)$ -- we can write
 
-$$P(\theta|x) \propto P(x, \theta)$$
+> $$P(\theta|x) \propto P(x, \theta)$$
 
-meaning that the unnormalized posterior is proportional to the joint distribution of $x$ and $\theta$. 
+> meaning that the unnormalized posterior is proportional to the joint distribution of $x$ and $\theta$. 
 
 
 Back to the example. The prior distribution we defined is convenient because we can actually compute the posterior distribution analytically. That's because for a normal likelihood with known standard deviation, the normal prior distribution for $\mu$ is [conjugate](https://en.wikipedia.org/wiki/Conjugate_prior), i.e. our posterior distribution will belong to the same family of distributions of the prior. Therefore, we know that our posterior distribution for $\mu$ is also normal. For a mathematical derivation see [here](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxiYXllc2VjdHxneDplNGY0MDljNDA5MGYxYTM).
@@ -284,9 +298,9 @@ To sum up, we accept a proposed move to $\theta^\star$ whenever the density of t
 If this was all we accepted, $\theta$ would get stuck at a local mode of the target distribution, so we also accept occasional moves to lower density regions.
 
 
-__NOTE__: The model we define enters the inference scheme only when we evaluate the proposal. In other words, the model we define is important made explicit in the definition of the `joint_log_prob` function, that is
+> __NOTE__: The model we define enters the inference scheme only when we evaluate the proposal. In other words, the model we define is important made explicit in the definition of the `joint_log_prob` function, that is
 
-    joint_log_prob = model definition
+>    joint_log_prob = model definition
     
 Let's now define the joint log probability of the normal model above.
 
