@@ -2,12 +2,12 @@
 authors:
 - admin
 categories: []
-comments: true 
 links:
   - icon_pack: fab
     icon: []
     name: Run in Colab
-    url: 'https://colab.research.google.com/drive/1XJ3dDH7uCbqg3P7HHlkFz9wGawFZJgYX'
+    url: 'https://colab.research.google.com/drive/1tDfViP2s2JvrMONrweK3M3KqHrH-m-tR'
+comments: true 
 date: "2019-06-19T00:00:00Z"
 lastmod: "2019-06-19T00:00:00Z"
 publishDate: "2019-06-19T00:00:00Z"
@@ -17,24 +17,19 @@ image:
   caption: ""
   focal_point: ""
 projects: []
-summary: "MCMC sampling: The Random-Walk Metropolis-Hasting algorithm explained with TensonFlow Probability"
+summary: "MCMC sampling: The Random-Walk Metropolis-Hasting algorithm explained with TensorFlow-Probability"
 tags: []
 title: Bayesian Inference with MCMC
 subtitle: A gentle introduction with code examples
 ---
 
 
-This blog post is an attempt at trying to explain the intuition behind MCMC sampling: specifically, a particular instance of the __Metropolis-Hasting algorithm__. Critically, we'll be using `TensonFlow Probability` code examples to explain the various concepts.
+This blog post is an attempt at trying to explain the intuition behind MCMC sampling: specifically, a particular instance of the __Metropolis-Hasting algorithm__. Critically, we'll be using `TensorFlow-Probability` code examples to explain the various concepts.
 
 ## The Problem
 
 First, let's import our modules. Note that we will use TensorFlow 2 Beta and we will use the TFP nightly distribution with works fine with TF2.
 
-
-```python
-!pip install tensorflow==2.0.0-beta0 
-!pip install tfp-nightly
-```
 
 ```python
 import numpy as np
@@ -51,7 +46,12 @@ tf.random.set_seed(1905)
 sns.set(rc={'figure.figsize':(9.3,6.1)})
 sns.set_context('paper')
 sns.set_style('whitegrid')
+
+print(tf.__version__, tfp.__version__)
 ```
+
+    2.0.0 0.7.0
+
 
 Let's generate some data: 20 points from a Gaussian distribution centered around zero (the true Data-Generating Process that we want to discover from the 20 samples we can see). Note that in TFP the Gaussian distribution is parametrized by mean and standard deviation, not the variance.
 
@@ -76,26 +76,24 @@ The model often depends on unknown parameters $\theta$. They can be unknown beca
 
 From a Bayesian viewpoint, we have to define a prior distribution for this parameter, i.e. $P(\theta)$. Let's also assume a normal distribution as a prior for $\mu$. Our model can be written as follows (we assumed that the prior is a Gaussian distribution with mean 4 and stardard deviation 2)
 
-$$x_i|\mu \stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1), \quad i = 1,\dots,N$$
+$$x_i|\mu \stackrel{i.i.d.}{\sim} \mathcal{N}(\mu, \sigma=1)$$
 
 $$\mu \sim \mathcal{N}(\mu_0 = 4, \sigma_0 = 2)$$
 
 
 
-In the Bayesian Stat lingo, this way of writing the model derives from the fact that knowing nothing about the joint distribution of the $x_i$'s we can assume [exchangeability](https://en.wikipedia.org/wiki/Exchangeable_random_variables). By the [De Finetti's Theorem](https://en.wikipedia.org/wiki/De_Finetti%27s_theorem) we arrive to the above formulation. Anyway, this goes beyond the scope of this blog post. For more information on Bayesian Analysis look at [Gelman et al. book](http://www.stat.columbia.edu/~gelman/book/).
+In the Bayesian Stat lingo, this way of writing the model derives from the fact that knowing nothing about the joint distribution of the $x$'s' we can assume [exchangeability](https://en.wikipedia.org/wiki/Exchangeable_random_variables). By the [De Finetti's Theorem](https://en.wikipedia.org/wiki/De_Finetti%27s_theorem) we arrive to the above formulation. Anyway, this goes beyond the scope of this blog post. For more information on Bayesian Analysis look at (the bible) [Gelman et al. book](http://www.stat.columbia.edu/~gelman/book/).
 
 
 ```python
-# prior 
+# prior
 mu_0, sigma_0 = 4., 2.
 prior = tfd.Normal(mu_0, sigma_0)
 
-# likelihood 
+# likelihood
 mu, sigma = prior.sample(1), 1. # use a sample from the prior as guess for mu
 likelihood = tfd.Normal(mu, sigma) 
 ```
-
-Since we do not know the mean of the Gaussian distribution which generated the data, we use a sample from the prior distribution as a guess for $\mu$ in order to be able to draw it (we need a value), the likelihood has a mean similar to that of the prior distribution.
 
 > __Digression__: note that actually what I called likelihood, is the likelihood for one specific datapoint -- call it $\mathrm{likelihood}_i, i=1,\dots,N$. The "proper" likelihood function is (given that we have an $i.i.d.$ sample) equal to the product of the "per-datapoint" likelihoods
 
@@ -106,6 +104,11 @@ Since we do not know the mean of the Gaussian distribution which generated the d
 > $$\mathcal{l}(\mu; x) = \sum_{i=1}^n \mathcal{l}(\mu; x_i)$$
 
 > Usually, the likelihood is denoted by $\mathcal{L}(\mu; x)$ or $p(x|\mu)$.
+
+
+Since we do not know the mean of the Gaussian distribution which generated the data, we use a sample from the prior distribution as a guess for $\mu$ in order to be able to draw it (we need a value), the likelihood has a mean similar to that of the prior distribution.
+
+
 
 In the graph below, I plot both the prior and the likelihood, as well as the true data-generating process with the data plotted as a rug
 
@@ -128,7 +131,6 @@ In the Bayesian framework, inference, i.e. knowing something more about the unkn
 
 $$P(\theta|x)=\frac{P(x|\theta)P(\theta)}{P(x)}$$
 
-
 The posterior distribution $P(\theta|x)$ -- that is, what we know about our model parameters $\theta$ after having seen thet data $x$ -- is our quantity of interest. 
 
 To compute it, we multiply the __prior__ $P(\theta)$ (what we think about $\theta$ before we have seen any data) and the __likelihood__ $P(x|\theta)$, dividing by the __evidence__ $P(x)$ (a.k.a. _marginal likelihood_).
@@ -143,17 +145,17 @@ This is the key difficulty with the Bayes formula -- while the formula looks pre
 
 
 
-> __Digression__: $P(x)$ is a normalizing constant. Up to this normalizing constant, we know exactly how the _unnormalized_ posterior distribution looks like, i.e.
+__NOTE__: $P(x)$ is a normalizing constant. Up to this normalizing constant, we know exactly how the _unnormalized_ posterior distribution looks like, i.e.
 
-> $$P(\theta|x) \propto P(x|\theta) P(\theta)$$
+$$P(\theta|x) \propto P(x|\theta) P(\theta)$$
 
-> (where $\propto$ mean "proportional to"). Since we defined both terms on the rhs, __we DO know how to sample from the unnormalized posterior distribution__
+(where $\propto$ mean "proportional to"). Since we defined both terms on the rhs, __we DO know how to sample from the unnormalized posterior distribution__
 
-> Furthermore, by the product rule  -- $P(A, B) = P(A|B) P(B)$ -- we can write
+Furthermore, by the product rule  -- $P(A, B) = P(A|B) P(B)$ -- we can write
 
-> $$P(\theta|x) \propto P(x, \theta)$$
+$$P(\theta|x) \propto P(x, \theta)$$
 
-> meaning that the unnormalized posterior is proportional to the joint distribution of $x$ and $\theta$. 
+meaning that the unnormalized posterior is proportional to the joint distribution of $x$ and $\theta$. 
 
 
 Back to the example. The prior distribution we defined is convenient because we can actually compute the posterior distribution analytically. That's because for a normal likelihood with known standard deviation, the normal prior distribution for $\mu$ is [conjugate](https://en.wikipedia.org/wiki/Conjugate_prior), i.e. our posterior distribution will belong to the same family of distributions of the prior. Therefore, we know that our posterior distribution for $\mu$ is also normal. For a mathematical derivation see [here](https://docs.google.com/viewer?a=v&pid=sites&srcid=ZGVmYXVsdGRvbWFpbnxiYXllc2VjdHxneDplNGY0MDljNDA5MGYxYTM).
@@ -298,9 +300,9 @@ To sum up, we accept a proposed move to $\theta^\star$ whenever the density of t
 If this was all we accepted, $\theta$ would get stuck at a local mode of the target distribution, so we also accept occasional moves to lower density regions.
 
 
-> __NOTE__: The model we define enters the inference scheme only when we evaluate the proposal. In other words, the model we define is important made explicit in the definition of the `joint_log_prob` function, that is
+__NOTE__: The model we define enters the inference scheme only when we evaluate the proposal. In other words, the model we define is important made explicit in the definition of the `joint_log_prob` function, that is
 
->    joint_log_prob = model definition
+    joint_log_prob = model definition
     
 Let's now define the joint log probability of the normal model above.
 
@@ -308,10 +310,10 @@ Let's now define the joint log probability of the normal model above.
 ```python
 # definition of the joint_log_prob to evaluate samples
 def joint_log_prob(data, proposal):
-  prior = tfd.Normal(mu_0, sigma_0, name='prior')
-  likelihood = tfd.Normal(proposal, sigma, name='likelihood')
+    prior = tfd.Normal(mu_0, sigma_0, name='prior')
+    likelihood = tfd.Normal(proposal, sigma, name='likelihood')
   
-  return prior.log_prob(proposal) + tf.reduce_mean(likelihood.log_prob(data))
+    return prior.log_prob(proposal) + tf.reduce_mean(likelihood.log_prob(data))
 ```
 
 Let's evaluate the proposal above, i.e. `mu_proposal`
@@ -331,10 +333,10 @@ It is more than 1, therefore we accept directly. Imagine that `p_accept` was $0.
 
 ```python
 if p_accept > tfd.Uniform().sample():
-  mu_current = mu_proposal
-  print('Proposal accepted')
+    mu_current = mu_proposal
+    print('Proposal accepted')
 else:
-  print('Proposal not accepted')
+    print('Proposal not accepted')
 ```
 
     Proposal accepted
@@ -352,7 +354,7 @@ First we define _how_ the step should be taken, i.e. how the proposal should be 
 ```python
 # define a closure on joint_log_prob
 def unnormalized_log_posterior(proposal):
-  return joint_log_prob(data=observed, proposal=proposal)
+    return joint_log_prob(data=observed, proposal=proposal)
 ```
 
 Now we can pass the `unnormalized_log_posterior` as the argument of the function which implements the step
@@ -384,9 +386,30 @@ trace, kernel_results = tfp.mcmc.sample_chain(
     parallel_iterations=1
 )
 ```
+However, to take full advantage of TF, we will enclose this sampling process into a function and we will decorate it with [`tf.function`](https://www.tensorflow.org/tutorials/customization/performance)
+
+```python
+@tf.function
+def run_chain():
+    samples, kernel_results = tfp.mcmc.sample_chain(
+        num_results=10**5,
+        num_burnin_steps=5000,
+        current_state=initial_state,
+        kernel=rwm,
+        parallel_iterations=1,
+        trace_fn=lambda _, pkr: pkr)
+    
+    return samples, kernel_results
+```
+
+> __Note__: To print the code generated by `tf.function` on `fn`, use
+```python
+ tf.autograph.to_code(fn.python_function)
+```
 
 
 ```python
+trace, kernel_results = run_chain()
 plt.plot(trace);
 ```
 
@@ -418,7 +441,7 @@ On the other hand, other frameworks like PyMC uses the [NUTS sampler](http://www
 
 
 
-For more material on this subject consult [Thomas' Blog](https://twiecki.io/), [Bayesian Methods for Hacker book](https://github.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/blob/master/Chapter1_Introduction/Ch1_Introduction_TFP.ipynb), [Duke University STAT course page](http://people.duke.edu/~ccc14/sta-663-2017/20A_MCMC.html), and [this lecture notes](https://warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/teaching/mcm-2007.pdf) for a technical review of Monte Carlo Methods. The material covered here was inspired by Thomas Wiecki's [blogpost](https://twiecki.io/blog/2015/11/10/mcmc-sampling/).
+For more material on this subject consult [Thomas Wiecki's Blog](https://twiecki.io/), [Bayesian Methods for Hacker book](https://github.com/CamDavidsonPilon/Probabilistic-Programming-and-Bayesian-Methods-for-Hackers/blob/master/Chapter1_Introduction/Ch1_Introduction_TFP.ipynb), [Duke University STAT course page](http://people.duke.edu/~ccc14/sta-663-2017/20A_MCMC.html), and [this lecture notes](https://warwick.ac.uk/fac/sci/statistics/staff/academic-research/johansen/teaching/mcm-2007.pdf) for a technical review of Monte Carlo Methods. The material covered here was inspired by Thomas Wiecki's [blogpost](https://twiecki.io/blog/2015/11/10/mcmc-sampling/).
 
 In a future blogpost I will discuss in more detail both the TFP implemetation of MCMC methods and the diagnostics of the MCMC procedure.
 
