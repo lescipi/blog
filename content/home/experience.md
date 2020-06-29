@@ -25,7 +25,11 @@ date_format = "Jan 2006"
   location = "Milano - Italy"
   date_start = "2020-03-02"
   date_end = ""
-  description = ""
+  description = """
+  * Customer segmentation
+  * Contributor to the development of an internal python library for end-to-end NLP
+  * Topic/Sentiment Analysis
+"""
 
 [[experience]]
   title = "Research Assistant"
@@ -33,7 +37,7 @@ date_format = "Jan 2006"
   company_url = "http://www.bidsa.unibocconi.eu/"
   location = "Milano - Italy"
   date_start = "2019-08-01"
-  date_end = ""
+  date_end = "2020-03-01"
   description = """
   * Twitter-funded project: Identification of echo chambers and online abuse on the Twitter platform
   * Topic/Sentiment Analysis
